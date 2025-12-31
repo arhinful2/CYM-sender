@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages with {{ member.full_name }} - Youth Church Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-comments me-2"></i>Messages with {{ member.full_name }}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'member_detail' member.id %}" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i> Back to Profile
+        </a>
+        <a href="{% url 'compose_message' %}?member={{ member.id }}" class="btn btn-primary">
+            <i class="fas fa-paper-plane me-1"></i> New Message
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-exchange-alt me-1"></i> Conversation History
+            </div>
+            <div class="card-body">
+                {% if conversations %}
+                <div class="conversation-thread">
+                    {% for conversation in conversations %}
+                    <div class="message-bubble {% if conversation.message.sender == user %}message-sent{% else %}message-received{% endif %} mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>
+                                    {% if conversation.message.sender == user %}
+                                        You
+                                    {% else %}
+                                        {{ conversation.message.sender.username }}
+                                    {% endif %}
+                                </strong>
+                                <p class="mb-1">{{ conversation.message.content }}</p>
+                            </div>
+                            <small class="text-muted">{{ conversation.message.created_at|date:"M j, Y, g:i a" }}</small>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{% url 'message_responses' conversation.message.id %}" class="btn btn-sm btn-outline-primary">
+                                View Responses ({{ conversation.message.responses.count }})
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                    <h5>No messages yet</h5>
+                    <p class="text-muted">Start a conversation with {{ member.first_name }}</p>
+                    <a href="{% url 'compose_message' %}?member={{ member.id }}" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i> Send Message
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

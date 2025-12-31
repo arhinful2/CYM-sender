@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Quick Attendance - Youth Church Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .attendance-card {
+        border-left: 4px solid #3498db;
+        margin-bottom: 10px;
+        transition: all 0.3s;
+    }
+    
+    .attendance-card:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .attendance-card.selected {
+        background-color: #e7f3ff;
+        border-left-color: #2ecc71;
+    }
+    
+    .member-checkbox {
+        transform: scale(1.2);
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-clipboard-check me-2"></i>Quick Attendance
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'admin_portal' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-calendar-check me-1"></i> Record Attendance
+            </div>
+            <div class="card-body">
+                <form method="post" id="attendance-form">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label for="service_type" class="form-label">Service Type</label>
+                            <select class="form-select" id="service_type" name="service_type" required>
+                                <option value="">Select Service Type</option>
+                                {% for value, label in service_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="service_date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="service_date" name="service_date" 
+                                   value="{{ today|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Attendance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5>Select Members Present</h5>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="select-all">
+                                    <i class="fas fa-check-square me-1"></i> Select All
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-all">
+                                    <i class="fas fa-times-circle me-1"></i> Deselect All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if members %}
+                        <div class="row" id="members-list">
+                            {% for member in members %}
+                            <div class="col-md-6 col-lg-4 mb-2">
+                                <div class="card attendance-card" id="member-{{ member.id }}">
+                                    <div class="card-body py-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input member-checkbox" 
+                                                   type="checkbox" 
+                                                   name="members" 
+                                                   value="{{ member.id }}" 
+                                                   id="member_{{ member.id }}">
+                                            <label class="form-check-label w-100" for="member_{{ member.id }}">
+                                                <div class="d-flex align-items-center">
+                                                    {% if member.photo %}
+                                                    <img src="{{ member.photo.url }}" class="profile-img-sm me-2">
+                                                    {% else %}
+                                                    <img src="/static/images/default_profile.png" class="profile-img-sm me-2">
+                                                    {% endif %}
+                                                    <div>
+                                                        <strong>{{ member.full_name }}</strong>
+                                                        <div class="small text-muted">{{ member.phone_number }}</div>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <h5>No Active Members Found</h5>
+                            <p class="text-muted">Add some members first to take attendance.</p>
+                            <a href="/admin/members/member/add/" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-1"></i> Add Member
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span id="selected-count" class="badge bg-primary">0 selected</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary" {% if not members %}disabled{% endif %}>
+                            <i class="fas fa-save me-1"></i> Save Attendance for <span id="count-display">0</span> Members
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>{{ members.count }}</h3>
+                <p class="text-muted mb-0">Active Members</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>0</h3>
+                <p class="text-muted mb-0">Today's Attendance</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>0%</h3>
+                <p class="text-muted mb-0">Attendance Rate</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update selected count
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('input[name="members"]:checked');
+        const count = checkboxes.length;
+        
+        document.getElementById('selected-count').textContent = `${count} selected`;
+        document.getElementById('count-display').textContent = count;
+        
+        // Highlight selected cards
+        checkboxes.forEach(cb => {
+            const card = document.getElementById(`member-${cb.value}`);
+            if (card) card.classList.add('selected');
+        });
+        
+        // Remove highlight from unselected
+        document.querySelectorAll('input[name="members"]').forEach(cb => {
+            if (!cb.checked) {
+                const card = document.getElementById(`member-${cb.value}`);
+                if (card) card.classList.remove('selected');
+            }
+        });
+    }
+    
+    // Select all button
+    document.getElementById('select-all').addEventListener('click', function() {
+        document.querySelectorAll('input[name="members"]').forEach(cb => {
+            cb.checked = true;
+        });
+        updateSelectedCount();
+    });
+    
+    // Deselect all button
+    document.getElementById('deselect-all').addEventListener('click', function() {
+        document.querySelectorAll('input[name="members"]').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelectedCount();
+    });
+    
+    // Checkbox change event
+    document.querySelectorAll('input[name="members"]').forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+    
+    // Initialize count
+    updateSelectedCount();
+    
+    // Form submission
+    document.getElementById('attendance-form').addEventListener('submit', function(e) {
+        const checkboxes = document.querySelectorAll('input[name="members"]:checked');
+        if (checkboxes.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one member.');
+            return false;
+        }
+        
+        if (!document.getElementById('service_type').value) {
+            e.preventDefault();
+            alert('Please select a service type.');
+            return false;
+        }
+        
+        // Show confirmation
+        return confirm(`Record attendance for ${checkboxes.length} members?`);
+    });
+    
+    // Quick search functionality
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'form-control mb-3';
+    searchInput.placeholder = 'Search members...';
+    searchInput.id = 'member-search';
+    
+    document.querySelector('#members-list').parentElement.prepend(searchInput);
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('.attendance-card').forEach(card => {
+            const memberName = card.querySelector('strong').textContent.toLowerCase();
+            const phone = card.querySelector('.text-muted').textContent.toLowerCase();
+            
+            if (memberName.includes(searchTerm) || phone.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

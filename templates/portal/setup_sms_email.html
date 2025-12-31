@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}SMS & Email Setup - Youth Church Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-cogs me-2"></i>SMS & Email Setup
+    </h1>
+</div>
+
+<div class="row">
+    <!-- SMS Configuration -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-sms me-1"></i> SMS Configuration
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="save_sms">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">SMS Provider</label>
+                        <select class="form-select" name="provider" id="smsProvider">
+                            <option value="manual" {% if sms_config.provider == 'manual' %}selected{% endif %}>Manual/Log Only</option>
+                            <option value="twilio" {% if sms_config.provider == 'twilio' %}selected{% endif %}>Twilio</option>
+                            <option value="africastalking" {% if sms_config.provider == 'africastalking' %}selected{% endif %}>Africa's Talking</option>
+                        </select>
+                        <small class="text-muted">Choose your SMS provider</small>
+                    </div>
+                    
+                    <!-- Twilio Settings -->
+                    <div id="twilioSettings" style="display: {% if sms_config.provider == 'twilio' %}block{% else %}none{% endif %};">
+                        <div class="mb-3">
+                            <label class="form-label">Account SID</label>
+                            <input type="text" class="form-control" name="twilio_account_sid" 
+                                   value="{{ sms_config.twilio_account_sid }}" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxx">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Auth Token</label>
+                            <input type="password" class="form-control" name="twilio_auth_token" 
+                                   value="{{ sms_config.twilio_auth_token }}" placeholder="xxxxxxxxxxxxxxxxxxxxxxxx">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" name="twilio_phone_number" 
+                                   value="{{ sms_config.twilio_phone_number }}" placeholder="+1234567890">
+                        </div>
+                    </div>
+                    
+                    <!-- Africa's Talking Settings -->
+                    <div id="africastalkingSettings" style="display: {% if sms_config.provider == 'africastalking' %}block{% else %}none{% endif %};">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" name="africastalking_username" 
+                                   value="{{ sms_config.africastalking_username }}" placeholder="sandbox or live username">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">API Key</label>
+                            <input type="password" class="form-control" name="africastalking_api_key" 
+                                   value="{{ sms_config.africastalking_api_key }}" placeholder="xxxxxxxxxxxxxxxxxxxxxxxx">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sender ID (Optional)</label>
+                            <input type="text" class="form-control" name="africastalking_sender_id" 
+                                   value="{{ sms_config.africastalking_sender_id }}" placeholder="Your brand name">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Sender Name</label>
+                        <input type="text" class="form-control" name="sender_name" 
+                               value="{{ sms_config.default_sender_name }}" placeholder="Church">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-save me-1"></i> Save SMS Configuration
+                    </button>
+                </form>
+                
+                <!-- Test SMS Form -->
+                <hr>
+                <h6>Test SMS</h6>
+                <form method="post" class="mt-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="test_sms">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="test_phone" 
+                               placeholder="+1234567890" required>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-1"></i> Send Test SMS
+                        </button>
+                    </div>
+                    <small class="text-muted">Enter phone number with country code</small>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Email Configuration -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-envelope me-1"></i> Email Configuration
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="save_email">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email Provider</label>
+                        <select class="form-select" name="provider" id="emailProvider">
+                            <option value="gmail" {% if email_config.provider == 'gmail' %}selected{% endif %}>Gmail</option>
+                            <option value="outlook" {% if email_config.provider == 'outlook' %}selected{% endif %}>Outlook/Hotmail</option>
+                            <option value="yahoo" {% if email_config.provider == 'yahoo' %}selected{% endif %}>Yahoo</option>
+                            <option value="sendgrid" {% if email_config.provider == 'sendgrid' %}selected{% endif %}>SendGrid</option>
+                            <option value="custom" {% if email_config.provider == 'custom' %}selected{% endif %}>Custom SMTP</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">SMTP Host</label>
+                        <input type="text" class="form-control" name="smtp_host" 
+                               value="{{ email_config.smtp_host }}" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">SMTP Port</label>
+                                <input type="number" class="form-control" name="smtp_port" 
+                                       value="{{ email_config.smtp_port }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Security</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="use_tls" 
+                                               {% if email_config.use_tls %}checked{% endif %}>
+                                        <label class="form-check-label">Use TLS</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="use_ssl" 
+                                               {% if email_config.use_ssl %}checked{% endif %}>
+                                        <label class="form-check-label">Use SSL</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Username/Email</label>
+                        <input type="email" class="form-control" name="smtp_username" 
+                               value="{{ email_config.smtp_username }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Password/App Password</label>
+                        <input type="password" class="form-control" name="smtp_password" 
+                               value="{{ email_config.smtp_password }}" required>
+                        <small class="text-muted">For Gmail, use App Password (not regular password)</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">From Email</label>
+                                <input type="email" class="form-control" name="from_email" 
+                                       value="{{ email_config.from_email }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">From Name</label>
+                                <input type="text" class="form-control" name="from_name" 
+                                       value="{{ email_config.from_name }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-save me-1"></i> Save Email Configuration
+                    </button>
+                </form>
+                
+                <!-- Test Email Form -->
+                <hr>
+                <h6>Test Email</h6>
+                <form method="post" class="mt-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="test_email">
+                    <div class="input-group">
+                        <input type="email" class="form-control" name="test_email" 
+                               placeholder="test@example.com" required>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-1"></i> Send Test Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Guides -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-1"></i> Quick Setup Guides
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>For Gmail:</h6>
+                        <ol>
+                            <li>Go to <a href="https://myaccount.google.com/security" target="_blank">Google Security</a></li>
+                            <li>Enable 2-Step Verification</li>
+                            <li>Create App Password</li>
+                            <li>Use that password above (not your regular password)</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>For Twilio:</h6>
+                        <ol>
+                            <li>Sign up at <a href="https://twilio.com" target="_blank">Twilio.com</a></li>
+                            <li>Get Account SID and Auth Token from Dashboard</li>
+                            <li>Get a phone number from Twilio</li>
+                            <li>Add funds to your account</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show/hide SMS provider settings
+    document.getElementById('smsProvider').addEventListener('change', function() {
+        document.getElementById('twilioSettings').style.display = 'none';
+        document.getElementById('africastalkingSettings').style.display = 'none';
+        
+        if (this.value === 'twilio') {
+            document.getElementById('twilioSettings').style.display = 'block';
+        } else if (this.value === 'africastalking') {
+            document.getElementById('africastalkingSettings').style.display = 'block';
+        }
+    });
+    
+    // Auto-fill email settings based on provider
+    document.getElementById('emailProvider').addEventListener('change', function() {
+        const provider = this.value;
+        const hostInput = document.querySelector('input[name="smtp_host"]');
+        const portInput = document.querySelector('input[name="smtp_port"]');
+        const tlsCheckbox = document.querySelector('input[name="use_tls"]');
+        const sslCheckbox = document.querySelector('input[name="use_ssl"]');
+        
+        switch(provider) {
+            case 'gmail':
+                hostInput.value = 'smtp.gmail.com';
+                portInput.value = '587';
+                tlsCheckbox.checked = true;
+                sslCheckbox.checked = false;
+                break;
+            case 'outlook':
+                hostInput.value = 'smtp.office365.com';
+                portInput.value = '587';
+                tlsCheckbox.checked = true;
+                sslCheckbox.checked = false;
+                break;
+            case 'yahoo':
+                hostInput.value = 'smtp.mail.yahoo.com';
+                portInput.value = '587';
+                tlsCheckbox.checked = true;
+                sslCheckbox.checked = false;
+                break;
+            case 'sendgrid':
+                hostInput.value = 'smtp.sendgrid.net';
+                portInput.value = '587';
+                tlsCheckbox.checked = true;
+                sslCheckbox.checked = false;
+                break;
+            case 'custom':
+                // Leave as is
+                break;
+        }
+    });
+</script>
+{% endblock %}

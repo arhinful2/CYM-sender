@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Youth Church Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-chart-bar me-2"></i>Analytics Dashboard
+    </h1>
+</div>
+
+<div class="row">
+    <!-- Member Statistics -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-users me-1"></i> Member Statistics
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-primary text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ total_members }}</h3>
+                                <p class="mb-0">Total Members</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-success text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ active_members }}</h3>
+                                <p class="mb-0">Active Members</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-warning text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ inactive_members }}</h3>
+                                <p class="mb-0">Inactive Members</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-info text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>0</h3>
+                                <p class="mb-0">Visitors</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-venus-mars me-1"></i> Gender Distribution
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Statistics -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-comments me-1"></i> Message Statistics
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-primary text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ total_messages }}</h3>
+                                <p class="mb-0">Total Messages</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-success text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ broadcast_messages }}</h3>
+                                <p class="mb-0">Broadcast Messages</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-warning text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ individual_messages }}</h3>
+                                <p class="mb-0">Individual Messages</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-info text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ response_rate }}%</h3>
+                                <p class="mb-0">Response Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-child me-1"></i> Age Group Distribution
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-history me-1"></i> Recent Activity
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Activity logs will be displayed here.</p>
+                <!-- You can add a table or list of recent activities -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Gender Chart
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    const genderChart = new Chart(genderCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Male', 'Female', 'Other'],
+            datasets: [{
+                data: [
+                    {{ gender_stats.0.count|default:0 }},
+                    {{ gender_stats.1.count|default:0 }},
+                    {{ gender_stats.2.count|default:0 }}
+                ],
+                backgroundColor: [
+                    '#3498db',
+                    '#e74c3c',
+                    '#2ecc71'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Age Group Chart
+    const ageCtx = document.getElementById('ageChart').getContext('2d');
+    const ageChart = new Chart(ageCtx, {
+        type: 'bar',
+        data: {
+            labels: ['13-17', '18-25', '26-35', '36+'],
+            datasets: [{
+                label: 'Number of Members',
+                data: [
+                    {{ age_groups.13_17 }},
+                    {{ age_groups.18_25 }},
+                    {{ age_groups.26_35 }},
+                    {{ age_groups.36_plus }}
+                ],
+                backgroundColor: '#9b59b6'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

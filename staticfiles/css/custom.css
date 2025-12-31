@@ -1,0 +1,169 @@
+/* Custom styles for church management system */
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --light-color: #ecf0f1;
+    --dark-color: #2c3e50;
+}
+
+/* Custom button colors */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+/* Card enhancements */
+.card {
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+}
+
+/* Profile image styles */
+.profile-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.profile-img-sm {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.profile-img-md {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+/* Badge customizations */
+.badge-church {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Table styles */
+.table-hover tbody tr:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+/* Sidebar active item */
+.sidebar .nav-link.active {
+    background: linear-gradient(90deg, var(--primary-color), #2980b9);
+    color: white;
+}
+
+/* Message bubbles */
+.message-admin {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 15px 15px 0 15px;
+}
+
+.message-member {
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    border-radius: 15px 15px 15px 0;
+}
+
+/* Search highlight */
+.highlight {
+    background-color: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Statistics cards */
+.stat-card {
+    border-radius: 10px;
+    padding: 20px;
+    color: white;
+    margin-bottom: 20px;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.stat-card p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Form styles */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Custom alerts */
+.alert-church {
+    background-color: rgba(52, 152, 219, 0.1);
+    border-color: var(--primary-color);
+    color: var(--dark-color);
+}
+
+/* Pagination */
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.page-link {
+    color: var(--primary-color);
+}
+
+.page-link:hover {
+    color: #2980b9;
+}
+
+/* Loading spinner */
+.spinner-church {
+    color: var(--primary-color);
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+}
