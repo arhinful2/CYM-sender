@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'prayer',
     'giving',
     'notifications',
+    'pwa'
 ]
 
 MIDDLEWARE = [
@@ -181,4 +182,24 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    
+PWA_APP_NAME = 'Church Youth Management'
+PWA_APP_DESCRIPTION = "Manage your church youth events and messaging"
+PWA_APP_THEME_COLOR = '#000000'
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_START_URL = '/'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/images/icons-192.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/images/icons-512.png',
+        'sizes': '512x512'
+    }
+]
+    
 
