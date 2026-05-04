@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Trash - Message Management{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-1">🗑️ Trash</h2>
+            <p class="text-muted">Manage deleted messages and responses. Items in trash will be permanently deleted after 30 days.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'messaging_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Messaging
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {% for message in messages %}
+            <div>{{ message }}</div>
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Deleted Messages Section -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-envelope-x"></i> Deleted Messages
+                        <span class="badge bg-secondary ms-2">{{ deleted_messages.paginator.count }}</span>
+                    </h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                            onclick="toggleSelectAll('message-checkboxes')" id="select-all-messages">
+                            Select All
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if deleted_messages %}
+                    <form method="post" id="message-form">
+                        {% csrf_token %}
+                        <div id="message-checkboxes">
+                            {% for msg in deleted_messages %}
+                            <div class="border-bottom p-3 message-item {% if forloop.first %}border-top{% endif %}" 
+                                 data-message-id="{{ msg.id }}">
+                                <div class="d-flex align-items-start gap-3">
+                                    <input type="checkbox" class="form-check-input mt-1 message-checkbox" 
+                                           name="selected_ids" value="{{ msg.id }}">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ msg.subject }}</h6>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-person-fill"></i> {{ msg.sender.get_full_name|default:msg.sender.username }}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-clock"></i> Deleted: {{ msg.deleted_at|date:"M d, Y H:i" }}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-chat-dots"></i> {{ msg.responses.count }} responses
+                                        </small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <form method="post" action="{% url 'restore_message' msg.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item">
+                                                        <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="post" action="{% url 'permanently_delete_message' msg.id %}" 
+                                                      class="d-inline" onsubmit="return confirm('Permanently delete this message? This cannot be undone.');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="bi bi-trash"></i> Permanently Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Bulk Actions for Messages -->
+                        <div class="p-3 bg-light border-top d-none" id="message-bulk-actions">
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="text-muted">
+                                    <strong id="selected-messages-count">0</strong> message(s) selected
+                                </span>
+                                <button type="button" class="btn btn-sm btn-success" 
+                                        onclick="bulkAction('restore_messages')">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                        onclick="bulkAction('delete_messages')"
+                                        title="Permanently delete selected messages">
+                                    <i class="bi bi-trash"></i> Permanently Delete
+                                </button>
+                                <input type="hidden" name="action" id="bulk-action" value="">
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Pagination -->
+                    {% if deleted_messages.has_other_pages %}
+                    <nav class="p-3 border-top" aria-label="Message pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if deleted_messages.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ deleted_messages.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in deleted_messages.paginator.page_range %}
+                            <li class="page-item {% if deleted_messages.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+
+                            {% if deleted_messages.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ deleted_messages.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ deleted_messages.paginator.num_pages }}">Last</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
+                        <p class="mt-2 mb-0">No deleted messages</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Deleted Responses Section -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-x"></i> Deleted Responses
+                        <span class="badge bg-secondary ms-2">{{ deleted_responses|length }}</span>
+                    </h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                            onclick="toggleSelectAll('response-checkboxes')" id="select-all-responses">
+                            Select All
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if deleted_responses %}
+                    <form method="post" id="response-form">
+                        {% csrf_token %}
+                        <div id="response-checkboxes">
+                            {% for resp in deleted_responses %}
+                            <div class="border-bottom p-3 response-item {% if forloop.first %}border-top{% endif %}" 
+                                 data-response-id="{{ resp.id }}">
+                                <div class="d-flex align-items-start gap-3">
+                                    <input type="checkbox" class="form-check-input mt-1 response-checkbox" 
+                                           name="selected_ids" value="{{ resp.id }}">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <span class="badge bg-info">{{ resp.message.subject|truncatewords:5 }}</span>
+                                        </h6>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-reply-all"></i> From: {{ resp.respondent.full_name }}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-clock"></i> Deleted: {{ resp.deleted_at|date:"M d, Y H:i" }}
+                                        </small>
+                                        <p class="mb-2 mt-2 text-break">{{ resp.response_content|truncatewords:20 }}</p>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <form method="post" action="{% url 'restore_message_response' resp.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item">
+                                                        <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="post" action="{% url 'permanently_delete_message_response' resp.id %}" 
+                                                      class="d-inline" onsubmit="return confirm('Permanently delete this response? This cannot be undone.');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="bi bi-trash"></i> Permanently Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Bulk Actions for Responses -->
+                        <div class="p-3 bg-light border-top d-none" id="response-bulk-actions">
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="text-muted">
+                                    <strong id="selected-responses-count">0</strong> response(s) selected
+                                </span>
+                                <button type="button" class="btn btn-sm btn-success" 
+                                        onclick="bulkActionResponses('restore_responses')">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                        onclick="bulkActionResponses('delete_responses')"
+                                        title="Permanently delete selected responses">
+                                    <i class="bi bi-trash"></i> Permanently Delete
+                                </button>
+                                <input type="hidden" name="action" id="response-bulk-action" value="">
+                            </div>
+                        </div>
+                    </form>
+
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-chat" style="font-size: 2rem; opacity: 0.5;"></i>
+                        <p class="mt-2 mb-0">No deleted responses</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Trash Stats -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="bi bi-graph-up"></i> Trash Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Total Items in Trash</small>
+                        <h4 class="mb-0">{{ total_deleted }}</h4>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Deleted Messages</small>
+                        <h5 class="mb-0">{{ deleted_messages.paginator.count }}</h5>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Deleted Responses</small>
+                        <h5 class="mb-0">{{ deleted_responses|length }}</h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty Trash Button -->
+            {% if total_deleted > 0 %}
+            <div class="card border-danger shadow-sm">
+                <div class="card-body">
+                    <form method="post" onsubmit="return confirm('Permanently delete all items in trash? This cannot be undone.');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="empty_trash">
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="bi bi-trash"></i> Empty Trash Permanently
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Info Box -->
+            <div class="alert alert-info mt-4" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-info-circle"></i> Trash Information
+                </h6>
+                <small>
+                    <ul class="mb-0 ps-3">
+                        <li>Deleted items are kept in trash for 30 days</li>
+                        <li>You can restore items from trash anytime</li>
+                        <li>Permanently deleted items cannot be recovered</li>
+                        <li>Click "Empty Trash" to delete all items permanently</li>
+                    </ul>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSelectAll(containerId) {
+    const container = document.getElementById(containerId);
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+    
+    updateBulkActions(container);
+}
+
+function updateBulkActions(container) {
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+    const bulkActionsId = container.id === 'message-checkboxes' ? 'message-bulk-actions' : 'response-bulk-actions';
+    const bulkActions = document.getElementById(bulkActionsId);
+    const countId = container.id === 'message-checkboxes' ? 'selected-messages-count' : 'selected-responses-count';
+    
+    document.getElementById(countId).textContent = checkboxes.length;
+    
+    if (checkboxes.length > 0) {
+        bulkActions.classList.remove('d-none');
+    } else {
+        bulkActions.classList.add('d-none');
+    }
+}
+
+function bulkAction(action) {
+    const form = document.getElementById('message-form');
+    document.getElementById('bulk-action').value = action;
+    if (form.querySelector('input[name="selected_ids"]:checked')) {
+        form.submit();
+    }
+}
+
+function bulkActionResponses(action) {
+    const form = document.getElementById('response-form');
+    document.getElementById('response-bulk-action').value = action;
+    if (form.querySelector('input[name="selected_ids"]:checked')) {
+        form.submit();
+    }
+}
+
+// Update bulk actions when checkboxes change
+document.querySelectorAll('.message-checkbox, .response-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+        const container = e.target.closest('[id$="-checkboxes"]');
+        updateBulkActions(container);
+    });
+});
+</script>
+{% endblock %}

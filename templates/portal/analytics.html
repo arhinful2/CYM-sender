@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Youth Church Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .metric-card {
+        border: 0;
+        box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.08);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-chart-bar me-2"></i>Analytics Dashboard
+    </h1>
+</div>
+
+<div class="row">
+    <!-- Member Statistics -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-users me-1"></i> Member Statistics
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-primary text-white mb-3 metric-card">
+                            <div class="card-body text-center">
+                                <h3>{{ total_members }}</h3>
+                                <p class="mb-0">Total Members</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-success text-white mb-3 metric-card">
+                            <div class="card-body text-center">
+                                <h3>{{ active_members }}</h3>
+                                <p class="mb-0">Active Members</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-warning text-white mb-3 metric-card">
+                            <div class="card-body text-center">
+                                <h3>{{ inactive_members }}</h3>
+                                <p class="mb-0">Inactive Members</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-info text-white mb-3 metric-card">
+                            <div class="card-body text-center">
+                                <h3>{{ visitor_members }}</h3>
+                                <p class="mb-0">Visitors</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-venus-mars me-1"></i> Gender Distribution
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-calendar-check me-1"></i> Attendance by Service
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="serviceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Statistics -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-comments me-1"></i> Message Statistics
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-primary text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ total_messages }}</h3>
+                                <p class="mb-0">Total Messages</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-success text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ broadcast_messages }}</h3>
+                                <p class="mb-0">Broadcast Messages</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-warning text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ individual_messages }}</h3>
+                                <p class="mb-0">Individual Messages</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-info text-white mb-3">
+                            <div class="card-body text-center">
+                                <h3>{{ response_rate }}%</h3>
+                                <p class="mb-0">Response Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-child me-1"></i> Age Group Distribution
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-chart-line me-1"></i> Attendance by Month
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="monthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-calendar-week me-1"></i> Attendance by Week
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="weekChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark text-white metric-card mb-3">
+                <div class="card-body text-center">
+                    <h3>{{ current_week_total }}</h3>
+                    <p class="mb-0">This Week's Attendance</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white metric-card mb-3">
+                <div class="card-body text-center">
+                    <h3>{{ current_month_total }}</h3>
+                    <p class="mb-0">This Month's Attendance</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white metric-card mb-3">
+                <div class="card-body text-center">
+                    <h3>{{ today_attendance_count|default:0 }}</h3>
+                    <p class="mb-0">Today's Attendance</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white metric-card mb-3">
+                <div class="card-body text-center">
+                    <h3>{{ response_rate }}%</h3>
+                    <p class="mb-0">Message Response Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-history me-1"></i> Recent Activity
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Activity logs will be displayed here.</p>
+                <!-- You can add a table or list of recent activities -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const genderLabels = JSON.parse('{{ gender_chart_labels|escapejs }}');
+    const genderValues = JSON.parse('{{ gender_chart_data|escapejs }}');
+    const ageLabels = JSON.parse('{{ age_chart_labels|escapejs }}');
+    const ageValues = JSON.parse('{{ age_chart_data|escapejs }}');
+    const serviceLabels = JSON.parse('{{ attendance_service_labels|escapejs }}');
+    const serviceValues = JSON.parse('{{ attendance_service_data|escapejs }}');
+    const monthLabels = JSON.parse('{{ attendance_month_labels|escapejs }}');
+    const monthValues = JSON.parse('{{ attendance_month_data|escapejs }}');
+    const weekLabels = JSON.parse('{{ attendance_week_labels|escapejs }}');
+    const weekValues = JSON.parse('{{ attendance_week_data|escapejs }}');
+
+    // Gender Chart
+    const genderCtx = document.getElementById('genderChart').getContext('2d');
+    const genderChart = new Chart(genderCtx, {
+        type: 'pie',
+        data: {
+            labels: genderLabels,
+            datasets: [{
+                data: genderValues,
+                backgroundColor: [
+                    '#3498db',
+                    '#e74c3c',
+                    '#2ecc71'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Age Group Chart
+    const ageCtx = document.getElementById('ageChart').getContext('2d');
+    const ageChart = new Chart(ageCtx, {
+        type: 'bar',
+        data: {
+            labels: ageLabels,
+            datasets: [{
+                label: 'Number of Members',
+                data: ageValues,
+                backgroundColor: '#9b59b6'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+    const serviceChart = new Chart(serviceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: serviceLabels,
+            datasets: [{
+                data: serviceValues,
+                backgroundColor: ['#0d6efd', '#198754', '#fd7e14', '#dc3545', '#6f42c1', '#20c997', '#6c757d']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    const monthCtx = document.getElementById('monthChart').getContext('2d');
+    const monthChart = new Chart(monthCtx, {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Attendance Records',
+                data: monthValues,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.15)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    const weekCtx = document.getElementById('weekChart').getContext('2d');
+    const weekChart = new Chart(weekCtx, {
+        type: 'bar',
+        data: {
+            labels: weekLabels,
+            datasets: [{
+                label: 'Attendance Records',
+                data: weekValues,
+                backgroundColor: '#198754'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

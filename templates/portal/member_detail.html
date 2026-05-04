@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ member.full_name }} - Youth Church Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-user me-2"></i>{{ member.full_name }}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'member_messages' member.id %}" class="btn btn-primary me-2">
+            <i class="fas fa-comment me-1"></i> Send Message
+        </a>
+        <a href="/admin/members/member/{{ member.id }}/change/" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-edit me-1"></i> Edit
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                {% if member.photo %}
+                <img src="{{ member.photo.url }}" class="member-photo mb-3">
+                {% else %}
+                <img src="/static/images/default_profile.png" class="member-photo mb-3">
+                {% endif %}
+                <h4>{{ member.full_name }}</h4>
+                <p class="text-muted">{{ member.department }}</p>
+                <p>
+                    <span class="badge {% if member.status == 'active' %}bg-success{% else %}bg-warning{% endif %}">
+                        {{ member.status|title }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-phone me-1"></i> Contact Information
+            </div>
+            <div class="card-body">
+                <p><strong>Phone:</strong> {{ member.phone_number }}</p>
+                <p><strong>Email:</strong> {{ member.email }}</p>
+                <p><strong>Address:</strong> {{ member.address }}, {{ member.city }}, {{ member.state }} {{ member.postal_code }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle me-1"></i> Emergency Contact
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ member.emergency_contact_name }}</p>
+                <p><strong>Phone:</strong> {{ member.emergency_contact_phone }}</p>
+                <p><strong>Relationship:</strong> {{ member.emergency_contact_relationship }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-1"></i> Personal Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Date of Birth:</strong> {{ member.date_of_birth }}</p>
+                        <p><strong>Age:</strong> {{ member.age }}</p>
+                        <p><strong>Gender:</strong> {{ member.get_gender_display }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Date Joined:</strong> {{ member.date_joined }}</p>
+                        <p><strong>Baptism Date:</strong> {{ member.baptism_date|default:"Not recorded" }}</p>
+                        <p><strong>Occupation:</strong> {{ member.occupation|default:"Not specified" }}</p>
+                        <p><strong>School:</strong> {{ member.school|default:"Not specified" }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <p><strong>Talents:</strong> {{ member.talents|default:"Not specified" }}</p>
+                        <p><strong>Spiritual Gifts:</strong> {{ member.spiritual_gifts|default:"Not specified" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-history me-1"></i> Recent Attendance</span>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if attendance %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in attendance %}
+                            <tr>
+                                <td>{{ record.service_date }}</td>
+                                <td>{{ record.service_type }}</td>
+                                <td>
+                                    {% if record.attended %}
+                                    <span class="badge bg-success">Present</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Absent</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No attendance records found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-comments me-1"></i> Recent Messages</span>
+                <a href="{% url 'member_messages' member.id %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if conversations %}
+                <div class="list-group">
+                    {% for conversation in conversations %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between gap-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ conversation.message.subject }}</h6>
+                                <p class="mb-1">{{ conversation.message.content|truncatechars:100 }}</p>
+                                <small>{{ conversation.last_updated|date:"M d, Y" }}</small>
+                            </div>
+                            <div class="d-flex flex-column gap-2 align-items-end">
+                                <a href="{% url 'message_responses' conversation.message.id %}" class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                                <form method="post" action="{% url 'delete_message' conversation.message.id %}" onsubmit="return confirm('Delete this message and all related responses?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'member_detail' member.id %}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <small>
+                            {% if conversation.responded %}
+                            <span class="badge bg-success">Responded</span>
+                            {% else %}
+                            <span class="badge bg-warning">No response</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No messages sent to this member.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

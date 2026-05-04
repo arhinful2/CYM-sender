@@ -1,0 +1,171 @@
+# Django
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Database
+db.sqlite3
+*.db
+
+# Django migrations (optional - keep for version control)
+# migrations/
+
+# Static files and media
+staticfiles/
+/static/
+/media/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Credentials and API Keys (CRITICAL - NEVER COMMIT)
+credentials/
+credentials.json
+credentials.txt
+*.credentials
+api_keys/
+api_key.txt
+.aws/
+.credentials/
+secrets/
+config/secrets.py
+
+# Security and private files
+private_key*
+*.key
+*.pem
+*.p12
+password*.txt
+secret*.txt
+apikey*.txt
+token*.txt
+arkesel_api_key*
+
+# IDE and Editor
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Python
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Testing
+.pytest_cache/
+test_results/
+
+# Logs
+*.log
+logs/
+
+# Local development
+*.local
+local_settings.py
+local.py
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+.~*
+
+# Node (if using npm/yarn for frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Package manager
+Pipfile.lock
+poetry.lock
+
+# Docker
+docker-compose.override.yml
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+.envrc
+
+# SSL certificates (if local)
+*.crt
+*.cert
+*.csr
+
+# Backup files
+backup/
+*.backup
+
+# Cache
+.cache/
+cache/
+.pytest_cache/
+
+# Editor backups
+*~
+*.bak
+*.swp
+*swo
+
+# Environment specific
+.env.production
+.env.staging
+
+# Sensitive configuration files
+settings_local.py
+local_config.py
+database.yml

@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+
+{% block title %}Quick Attendance - Youth Church Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .attendance-card {
+        border-left: 4px solid #3498db;
+        margin-bottom: 10px;
+        transition: all 0.3s;
+    }
+    
+    .attendance-card:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .attendance-card.selected {
+        background-color: #e7f3ff;
+        border-left-color: #2ecc71;
+    }
+    
+    .member-checkbox {
+        transform: scale(1.2);
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-clipboard-check me-2"></i>Quick Attendance
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'attendance_history' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-history me-1"></i> Attendance History
+        </a>
+        <a href="{% url 'admin_portal' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-calendar-check me-1"></i> Record Attendance
+            </div>
+            <div class="card-body">
+                <form method="post" id="attendance-form">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label for="service_type" class="form-label">Service Type</label>
+                            <select class="form-select" id="service_type" name="service_type" required>
+                                <option value="">Select Service Type</option>
+                                {% for value, label in service_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="service_date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="service_date" name="service_date" 
+                                   value="{{ today|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Attendance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5>Select Members Present</h5>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="select-all">
+                                    <i class="fas fa-check-square me-1"></i> Select All
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-all">
+                                    <i class="fas fa-times-circle me-1"></i> Deselect All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if members %}
+                        <div class="row" id="members-list">
+                            {% for member in members %}
+                            <div class="col-md-6 col-lg-4 mb-2">
+                                <div class="card attendance-card" id="member-{{ member.id }}">
+                                    <div class="card-body py-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input member-checkbox" 
+                                                   type="checkbox" 
+                                                   name="members" 
+                                                   value="{{ member.id }}" 
+                                                   id="member_{{ member.id }}">
+                                            <label class="form-check-label w-100" for="member_{{ member.id }}">
+                                                <div class="d-flex align-items-center">
+                                                    {% if member.photo %}
+                                                    <img src="{{ member.photo.url }}" class="profile-img-sm me-2">
+                                                    {% else %}
+                                                    <img src="/static/images/default_profile.png" class="profile-img-sm me-2">
+                                                    {% endif %}
+                                                    <div>
+                                                        <strong>{{ member.full_name }}</strong>
+                                                        <div class="small text-muted">{{ member.phone_number }}</div>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <h5>No Active Members Found</h5>
+                            <p class="text-muted">Add some members first to take attendance.</p>
+                            <a href="/admin/members/member/add/" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-1"></i> Add Member
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span id="selected-count" class="badge bg-primary">0 selected</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary" {% if not members %}disabled{% endif %}>
+                            <i class="fas fa-save me-1"></i> Save Attendance for <span id="count-display">0</span> Members
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>{{ members.count }}</h3>
+                <p class="text-muted mb-0">Active Members</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>{{ today_attendance_count }}</h3>
+                <p class="text-muted mb-0">Today's Attendance</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>{{ attendance_rate }}%</h3>
+                <p class="text-muted mb-0">Attendance Rate</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <i class="fas fa-list-check me-1"></i> Today's Attendance Records
+                </div>
+                <span class="badge bg-primary">{{ today_attendance_count }} record{{ today_attendance_count|pluralize }}</span>
+            </div>
+            <div class="card-body">
+                {% if today_attendance_records %}
+                <div class="row g-3">
+                    {% for record in today_attendance_records %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="border rounded p-3 h-100 bg-light">
+                            <div class="fw-semibold">{{ record.member.full_name }}</div>
+                            <div class="text-muted small">{{ record.service_type }}</div>
+                            <div class="small mt-2">
+                                <span class="badge bg-success">Present</span>
+                                <span class="text-muted ms-2">{{ record.check_in_time|date:'g:i a' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                    <p class="mb-0">No attendance has been recorded for today yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Professional notice modal -->
+<div class="modal fade" id="attendanceNoticeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="attendanceNoticeTitle">Notice</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="attendanceNoticeMessage" class="text-secondary"></div>
+            </div>
+            <div class="modal-footer" id="attendanceNoticeFooter">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="attendanceNoticeCancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="attendanceNoticeOk">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const noticeModalElement = document.getElementById('attendanceNoticeModal');
+    const noticeModal = new bootstrap.Modal(noticeModalElement);
+    const noticeTitle = document.getElementById('attendanceNoticeTitle');
+    const noticeMessage = document.getElementById('attendanceNoticeMessage');
+    const noticeFooter = document.getElementById('attendanceNoticeFooter');
+    const noticeOk = document.getElementById('attendanceNoticeOk');
+    const noticeCancel = document.getElementById('attendanceNoticeCancel');
+
+    function showAttendanceNotice({ title, message, type = 'info', showCancel = false, okText = 'OK', cancelText = 'Cancel' }) {
+        noticeTitle.textContent = title;
+        noticeMessage.innerHTML = message;
+        noticeOk.textContent = okText;
+        noticeCancel.textContent = cancelText;
+
+        noticeTitle.parentElement.className = 'modal-header text-white ' + (type === 'warning' ? 'bg-warning text-dark' : type === 'danger' ? 'bg-danger' : type === 'success' ? 'bg-success' : 'bg-dark');
+        noticeCancel.style.display = showCancel ? 'inline-block' : 'none';
+        noticeOk.className = 'btn ' + (type === 'warning' ? 'btn-warning' : type === 'danger' ? 'btn-danger' : 'btn-primary');
+
+        return new Promise((resolve) => {
+            const okHandler = () => {
+                cleanup();
+                resolve(true);
+            };
+            const cancelHandler = () => {
+                cleanup();
+                resolve(false);
+            };
+            const hiddenHandler = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            function cleanup() {
+                noticeOk.removeEventListener('click', okHandler);
+                noticeCancel.removeEventListener('click', cancelHandler);
+                noticeModalElement.removeEventListener('hidden.bs.modal', hiddenHandler);
+                noticeModal.hide();
+            }
+
+            noticeOk.addEventListener('click', okHandler);
+            noticeCancel.addEventListener('click', cancelHandler);
+            noticeModalElement.addEventListener('hidden.bs.modal', hiddenHandler, { once: true });
+            noticeModal.show();
+        });
+    }
+
+    // Update selected count
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('input[name="members"]:checked');
+        const count = checkboxes.length;
+        
+        document.getElementById('selected-count').textContent = `${count} selected`;
+        document.getElementById('count-display').textContent = count;
+        
+        // Highlight selected cards
+        checkboxes.forEach(cb => {
+            const card = document.getElementById(`member-${cb.value}`);
+            if (card) card.classList.add('selected');
+        });
+        
+        // Remove highlight from unselected
+        document.querySelectorAll('input[name="members"]').forEach(cb => {
+            if (!cb.checked) {
+                const card = document.getElementById(`member-${cb.value}`);
+                if (card) card.classList.remove('selected');
+            }
+        });
+    }
+    
+    // Select all button
+    document.getElementById('select-all').addEventListener('click', function() {
+        document.querySelectorAll('input[name="members"]').forEach(cb => {
+            cb.checked = true;
+        });
+        updateSelectedCount();
+    });
+    
+    // Deselect all button
+    document.getElementById('deselect-all').addEventListener('click', function() {
+        document.querySelectorAll('input[name="members"]').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelectedCount();
+    });
+    
+    // Checkbox change event
+    document.querySelectorAll('input[name="members"]').forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+    
+    // Initialize count
+    updateSelectedCount();
+    
+    // Form submission with duplicate pre-check
+    document.getElementById('attendance-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const checkboxes = Array.from(document.querySelectorAll('input[name="members"]:checked'));
+        if (checkboxes.length === 0) {
+            showAttendanceNotice({
+                title: 'No members selected',
+                message: 'Please select at least one member before saving attendance.',
+                type: 'warning',
+                showCancel: false,
+                okText: 'Got it'
+            });
+            return false;
+        }
+
+        const serviceType = document.getElementById('service_type').value;
+        const serviceDate = document.getElementById('service_date').value;
+
+        if (!serviceType) {
+            showAttendanceNotice({
+                title: 'Service type required',
+                message: 'Please select a service type before saving attendance.',
+                type: 'warning',
+                showCancel: false,
+                okText: 'Got it'
+            });
+            return false;
+        }
+
+        // Prepare member ids
+        const memberIds = checkboxes.map(cb => cb.value);
+
+        // Show a quick loading indicator
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Checking...';
+
+        // Call AJAX endpoint to check existing attendance
+        const payload = new URLSearchParams();
+        payload.append('service_type', serviceType);
+        payload.append('service_date', serviceDate);
+        memberIds.forEach(id => payload.append('member_ids[]', id));
+
+        fetch("{% url 'check_attendance' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value
+            },
+            body: payload
+        }).then(r => r.json()).then(data => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+
+            const already = data.already || [];
+            if (already.length > 0) {
+                // Build list of names
+                const names = already.map(a => a.name).slice(0, 25).join(', ');
+                if (already.length === memberIds.length) {
+                    showAttendanceNotice({
+                        title: 'Attendance already recorded',
+                        message: `<strong>All selected members have already been recorded</strong> for <strong>${serviceType}</strong> on <strong>${serviceDate}</strong>.<br><br>${names}`,
+                        type: 'warning',
+                        showCancel: false,
+                        okText: 'Review selection'
+                    });
+                    return;
+                }
+
+                const proceed = await showAttendanceNotice({
+                    title: 'Some members already recorded',
+                    message: `<strong>${already.length}</strong> of the selected members have already been recorded for <strong>${serviceType}</strong> on <strong>${serviceDate}</strong>.<br><br>${names}<br><br>Continue to record the remaining selected members?`,
+                    type: 'warning',
+                    showCancel: true,
+                    okText: 'Continue',
+                    cancelText: 'Cancel'
+                });
+                if (!proceed) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    return;
+                }
+
+                // Uncheck already-marked members so the form will submit only remaining
+                already.forEach(a => {
+                    const cb = document.getElementById('member_' + a.id);
+                    if (cb) {
+                        cb.checked = false;
+                        const card = document.getElementById(`member-${a.id}`);
+                        if (card) {
+                            card.classList.remove('selected');
+                            card.style.opacity = '0.6';
+                            card.style.borderLeftColor = '#dc3545';
+                            const badge = card.querySelector('.duplicate-badge') || document.createElement('span');
+                            badge.className = 'badge bg-warning text-dark duplicate-badge ms-2';
+                            badge.textContent = 'Already recorded';
+                            const title = card.querySelector('strong');
+                            if (title && !card.querySelector('.duplicate-badge')) {
+                                title.parentElement.appendChild(badge);
+                            }
+                        }
+                    }
+                });
+                updateSelectedCount();
+            }
+
+            // Submit the form (will record only non-duplicates)
+            document.getElementById('attendance-form').submit();
+        }).catch(err => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            showAttendanceNotice({
+                title: 'Check failed',
+                message: 'Could not check attendance right now. Please try again.',
+                type: 'danger',
+                showCancel: false,
+                okText: 'Close'
+            });
+            console.error(err);
+        });
+    });
+    
+    // Quick search functionality
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'form-control mb-3';
+    searchInput.placeholder = 'Search members...';
+    searchInput.id = 'member-search';
+    
+    document.querySelector('#members-list').parentElement.prepend(searchInput);
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('.attendance-card').forEach(card => {
+            const memberName = card.querySelector('strong').textContent.toLowerCase();
+            const phone = card.querySelector('.text-muted').textContent.toLowerCase();
+            
+            if (memberName.includes(searchTerm) || phone.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

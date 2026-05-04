@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Report{% endblock %}
+{% block extra_css %}
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    .report-card { box-shadow: none !important; border: 1px solid #ddd; }
+    body { background: #fff !important; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 no-print">
+    <div>
+      <h2 class="mb-0">Attendance Report</h2>
+      <small class="text-muted">Printable summary of the filtered attendance data.</small>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'attendance_history' %}" class="btn btn-outline-secondary">Back to History</a>
+      <button type="button" class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-3"><div class="card report-card"><div class="card-body text-center"><h4>{{ total_records }}</h4><div class="text-muted">Records</div></div></div></div>
+    <div class="col-md-3"><div class="card report-card"><div class="card-body text-center"><h4>{{ total_members }}</h4><div class="text-muted">Unique Members</div></div></div></div>
+    <div class="col-md-3"><div class="card report-card"><div class="card-body text-center"><h4>{{ today_records }}</h4><div class="text-muted">Today's Matches</div></div></div></div>
+    <div class="col-md-3"><div class="card report-card"><div class="card-body text-center"><h4>{% if latest_record %}{{ latest_record.member.full_name }}{% else %}None{% endif %}</h4><div class="text-muted">Latest Record</div></div></div></div>
+  </div>
+
+  <div class="card report-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Member</th>
+              <th>Service Date</th>
+              <th>Service Type</th>
+              <th>Status</th>
+              <th>Check-In Time</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in records %}
+            <tr>
+              <td>{{ a.member.full_name }}</td>
+              <td>{{ a.service_date }}</td>
+              <td>{{ a.service_type }}</td>
+              <td>{% if a.attended %}Present{% else %}Absent{% endif %}{% if show_deleted %} / Deleted{% endif %}</td>
+              <td>{{ a.check_in_time }}</td>
+              <td>{{ a.notes|default:'-' }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">No attendance records found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

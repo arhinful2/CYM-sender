@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Youth Church Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'compose_message' %}" class="btn btn-primary">
+            <i class="fas fa-paper-plane me-1"></i> New Message
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card blue">
+            <h3><i class="fas fa-users"></i></h3>
+            <h4>{{ total_members }}</h4>
+            <p>Total Members</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card green">
+            <h3><i class="fas fa-user-check"></i></h3>
+            <h4>{{ active_members }}</h4>
+            <p>Active Members</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card orange">
+            <h3><i class="fas fa-comments"></i></h3>
+            <h4>{{ total_messages }}</h4>
+            <p>Messages Sent</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card purple">
+            <h3><i class="fas fa-chart-line"></i></h3>
+            <h4>{{ recent_responses|length }}</h4>
+            <p>Recent Responses</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Recent Members -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-user-plus me-1"></i> Recently Added Members
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Photo</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in recent_members %}
+                            <tr style="cursor: pointer;" onclick="window.location='{% url 'member_detail' member.pk %}'">
+                                <td>
+                                    {% if member.photo %}
+                                    <img src="{{ member.photo.url }}" class="profile-img-sm">
+                                    {% else %}
+                                    <img src="/static/images/default_profile.png" class="profile-img-sm">
+                                    {% endif %}
+                                </td>
+                                <td>{{ member.full_name }}</td>
+                                <td>{{ member.phone_number }}</td>
+                                <td>
+                                    <span class="badge {% if member.status == 'active' %}bg-success{% else %}bg-warning{% endif %}">
+                                        {{ member.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No members found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{% url 'member_search' %}" class="btn btn-outline-primary btn-sm">
+                    View All Members <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Messages -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-envelope me-1"></i> Recent Messages
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Responses</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for message in recent_messages %}
+                            <tr>
+                                <td>{{ message.subject|truncatechars:30 }}</td>
+                                <td>
+                                    <span class="badge {% if message.is_broadcast %}bg-primary{% else %}bg-info{% endif %}">
+                                        {{ message.get_message_type_display }}
+                                    </span>
+                                </td>
+                                <td>{{ message.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="badge bg-success">{{ message.responses.count }}</span>
+                                </td>
+                                    <td class="text-end">
+                                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                                            <a href="{% url 'message_responses' message.id %}" class="btn btn-sm btn-outline-primary">
+                                                View
+                                            </a>
+                                            <form method="post" action="{% url 'delete_message' message.id %}" onsubmit="return confirm('Delete this message and all related responses?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{% url 'admin_portal' %}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                            </form>
+                                        </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No messages sent yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{% url 'messaging_dashboard' %}" class="btn btn-outline-primary btn-sm">
+                    Go to Messaging <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<!-- Quick Actions Panel -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-bolt me-1"></i> Quick Actions
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'compose_message' %}" class="btn btn-primary w-100 py-3 h-100">
+                    <i class="fas fa-paper-plane fa-2x mb-2"></i><br>
+                    Send Message
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/admin/members/member/add/" target="_blank" class="btn btn-success w-100 py-3 h-100">
+                    <i class="fas fa-user-plus fa-2x mb-2"></i><br>
+                    Add Member
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'member_search' %}" class="btn btn-info w-100 py-3 h-100">
+                    <i class="fas fa-search fa-2x mb-2"></i><br>
+                    Find Member
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'analytics_dashboard' %}" class="btn btn-warning w-100 py-3 h-100">
+                    <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
+                    View Reports
+                </a>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'quick_attendance' %}" class="btn btn-outline-info w-100 py-3 h-100">
+                    <i class="fas fa-clipboard-check fa-2x mb-2"></i><br>
+                    Quick Attendance
+                </a>
+            </div>
+        </div>
+        
+        <!-- Quick Forms -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-clock me-1"></i> Quick Attendance
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="/portal/quick-attendance/">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Service Type</label>
+                                <select class="form-select" name="service_type">
+                                    <option value="sunday_service">Sunday Service</option>
+                                    <option value="bible_study">Bible Study</option>
+                                    <option value="prayer_meeting">Prayer Meeting</option>
+                                    <option value="youth_meeting">Youth Meeting</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-check-circle me-1"></i> Take Attendance
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-bullhorn me-1"></i> Quick Announcement
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="/portal/quick-announcement/">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <input type="text" class="form-control" placeholder="Announcement title" name="title">
+                            </div>
+                            <div class="mb-3">
+                                <textarea class="form-control" rows="3" placeholder="Announcement content" name="content"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-paper-plane me-1"></i> Send Announcement
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

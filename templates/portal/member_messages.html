@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages with {{ member.full_name }} - Youth Church Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .member-messages-page .header-card {
+        border: none;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.12), rgba(46, 204, 113, 0.08));
+    }
+
+    .member-messages-page .conversation-item {
+        border-left: 4px solid #3498db;
+        border-radius: 0.6rem;
+        background: #fff;
+    }
+
+    .member-messages-page .conversation-item + .conversation-item {
+        margin-top: 0.85rem;
+    }
+
+    .member-messages-page .conversation-content {
+        white-space: pre-wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="member-messages-page">
+    <div class="card header-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between flex-wrap align-items-start gap-3">
+                <div>
+                    <h1 class="h3 mb-1"><i class="fas fa-comments me-2"></i>Messages with {{ member.full_name }}</h1>
+                    <p class="text-muted mb-0">Review conversation history and continue communication from one place.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'member_detail' member.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Profile
+                    </a>
+                    <a href="{% url 'compose_message' %}?member={{ member.id }}" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i> New Message
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-exchange-alt me-1"></i> Conversation History
+            </div>
+            <div class="card-body">
+                {% if conversations %}
+                <div class="conversation-thread">
+                    {% for conversation in conversations %}
+                    <div class="p-3 conversation-item message-bubble {% if conversation.message.sender == user %}message-sent{% else %}message-received{% endif %}">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-2">
+                            <div class="flex-grow-1">
+                                <strong>
+                                    {% if conversation.message.sender == user %}
+                                        You
+                                    {% else %}
+                                        {{ conversation.message.sender.username }}
+                                    {% endif %}
+                                </strong>
+                                <p class="mb-1 conversation-content">{{ conversation.message.content }}</p>
+                            </div>
+                            <small class="text-muted">{{ conversation.message.created_at|date:"M j, Y, g:i a" }}</small>
+                        </div>
+                        <div class="mt-2 d-flex flex-wrap gap-2 justify-content-end justify-content-md-start">
+                            <a href="{% url 'message_responses' conversation.message.id %}" class="btn btn-sm btn-outline-primary">
+                                View Responses ({{ conversation.message.responses.count }})
+                            </a>
+                            <form method="post" action="{% url 'delete_message' conversation.message.id %}" onsubmit="return confirm('Delete this message and all related responses?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{% url 'member_messages' member.id %}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash me-1"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                    <h5>No messages yet</h5>
+                    <p class="text-muted">Start a conversation with {{ member.first_name }}</p>
+                    <a href="{% url 'compose_message' %}?member={{ member.id }}" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i> Send Message
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

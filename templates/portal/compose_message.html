@@ -1,0 +1,610 @@
+{% extends 'base.html' %}
+{% block title %}Compose Message - Youth Church Management{% endblock %}
+
+{% block extra_css %}
+<style>
+  .compose-page .card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.08);
+  }
+
+  .compose-page .compose-header {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.12), rgba(46, 204, 113, 0.08));
+  }
+
+  .compose-page .recipient-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #e9ecef;
+    padding: 0.35rem 0.6rem;
+    border-radius: 20px;
+    margin: 0.2rem;
+    font-size: 0.875rem;
+    gap: 0.35rem;
+  }
+
+  .compose-page .recipient-tag .remove {
+    cursor: pointer;
+    color: #6c757d;
+    font-weight: 700;
+  }
+
+  .compose-page .recipient-tag .remove:hover {
+    color: #dc3545;
+  }
+
+  .compose-page .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+  }
+
+  .compose-page .search-result-item {
+    padding: 0.55rem 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f3f5;
+  }
+
+  .compose-page .search-result-item:hover {
+    background: #f8f9fa;
+  }
+
+  .compose-page .search-result-item:last-child {
+    border-bottom: none;
+  }
+
+  .compose-page #selected-recipients {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.3rem;
+    min-height: 90px;
+    background: #fafbfc;
+  }
+
+  @media (max-width: 576px) {
+    .compose-page .message-type-group {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .compose-page .message-type-group .btn {
+      border-radius: 0.5rem !important;
+      width: 100%;
+    }
+
+    .compose-page .quick-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="compose-page">
+  <div class="card compose-header mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between flex-wrap align-items-start gap-3">
+        <div>
+          <h1 class="h3 mb-1"><i class="fas fa-paper-plane me-2"></i>Compose Message</h1>
+          <p class="text-muted mb-0">Create announcements, reminders, or direct messages and send instantly.</p>
+        </div>
+        <a href="{% url 'messaging_dashboard' %}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-1"></i> Back to Messages
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+      <div class="card">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+          <h2 class="h5 mb-1"><i class="fas fa-edit me-1"></i> New Message</h2>
+          <p class="text-muted small mb-0">Choose message type, recipient scope, and preview before sending.</p>
+        </div>
+        <div class="card-body px-4 pb-4">
+          <form method="post" id="message-form" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <label class="form-label"><i class="fas fa-file-alt me-1 text-info"></i>Use Message Template (Optional)</label>
+              <div class="input-group">
+                <select id="template-selector" class="form-select">
+                  <option value="">-- Select a template or create new --</option>
+                  {% for template in templates %}
+                    <option value="{{ template.id }}" data-subject="{{ template.subject }}" data-content="{{ template.content|escape }}">
+                      {{ template.name }} ({{ template.get_template_type_display }})
+                    </option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-outline-secondary" type="button" id="manage-templates">
+                  <i class="fas fa-cog me-1"></i> Manage Templates
+                </button>
+              </div>
+              <small class="text-muted">Select a template to auto-fill subject and content, then edit as needed.</small>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Message Type</label>
+              <div class="btn-group w-100 message-type-group" role="group" aria-label="Message type selector">
+                <input type="radio" class="btn-check" name="message_type" id="type_broadcast" value="broadcast" checked />
+                <label class="btn btn-outline-primary" for="type_broadcast"><i class="fas fa-bullhorn me-1"></i> Broadcast to All</label>
+
+                <input type="radio" class="btn-check" name="message_type" id="type_group" value="group" />
+                <label class="btn btn-outline-primary" for="type_group"><i class="fas fa-users me-1"></i> Group Message</label>
+
+                <input type="radio" class="btn-check" name="message_type" id="type_individual" value="individual" />
+                <label class="btn btn-outline-primary" for="type_individual"><i class="fas fa-user me-1"></i> Individual</label>
+              </div>
+            </div>
+
+            <div class="mb-4" id="recipients-section" style="display: none;">
+              <label class="form-label" for="recipient-search">Select Recipients</label>
+              <div class="mb-3 position-relative">
+                <div class="input-group">
+                  <input type="text" id="recipient-search" class="form-control" placeholder="Search members by name or phone..." />
+                  <button class="btn btn-outline-secondary" type="button" id="search-button" aria-label="Search members">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+                <div class="search-results" id="search-results"></div>
+                <small class="text-muted">Type at least 2 characters to search members.</small>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Selected Recipients</label>
+                <div id="selected-recipients" class="border rounded p-3">
+                  <div class="text-muted" id="no-recipients">No recipients selected</div>
+                </div>
+              </div>
+
+              <div class="mb-3 d-flex flex-wrap gap-2 quick-actions">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="select-active"><i class="fas fa-user-check me-1"></i> Select Active Members</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all"><i class="fas fa-users me-1"></i> Select All Members</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" id="clear-all"><i class="fas fa-times me-1"></i> Clear All</button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="subject" class="form-label">Subject</label>
+              <input type="text" id="subject" name="subject" class="form-control" placeholder="Enter message subject..." required />
+            </div>
+
+            <div class="mb-4">
+              <label for="content" class="form-label">Message Content</label>
+              <textarea id="content" name="content" class="form-control" rows="9" placeholder="Type your message here..." required></textarea>
+              <div class="mt-2">
+                <small class="text-muted"><i class="fas fa-lightbulb me-1"></i>Use clear, concise language for better response rates.</small>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Preview</label>
+              <div class="border rounded p-3 bg-light">
+                <div id="message-preview">
+                  <p class="text-muted mb-0">Your message preview will appear here...</p>
+                </div>
+              </div>
+            </div>
+
+            <input type="hidden" id="recipients-input" />
+
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+              <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="fas fa-times me-1"></i> Cancel
+              </button>
+              <div class="d-flex flex-column flex-sm-row gap-2">
+                <button type="submit" name="action" value="draft" class="btn btn-secondary" formnovalidate>
+                  <i class="fas fa-save me-1"></i> Save Draft
+                </button>
+                <button type="submit" name="action" value="send" class="btn btn-primary">
+                  <i class="fas fa-paper-plane me-1"></i> Send Message
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Message type toggle
+  const messageTypeRadios = document.querySelectorAll(
+    'input[name="message_type"]',
+  );
+  const recipientsSection = document.getElementById("recipients-section");
+
+  messageTypeRadios.forEach((radio) => {
+    radio.addEventListener("change", function () {
+      if (this.value === "broadcast") {
+        recipientsSection.style.display = "none";
+      } else {
+        recipientsSection.style.display = "block";
+      }
+    });
+  });
+
+  // Selected recipients
+  let selectedRecipients = [];
+  const selectedRecipientsDiv = document.getElementById("selected-recipients");
+  const noRecipientsDiv = document.getElementById("no-recipients");
+  const recipientsInput = document.getElementById("recipients-input");
+
+  function updateSelectedRecipients() {
+    if (selectedRecipients.length > 0) {
+      noRecipientsDiv.style.display = "none";
+      selectedRecipientsDiv.innerHTML = "";
+
+      selectedRecipients.forEach((recipient) => {
+        const tag = document.createElement("div");
+        tag.className = "recipient-tag";
+        tag.innerHTML = `
+                    ${recipient.name}
+                    <span class="remove" data-id="${recipient.id}">&times;</span>
+                `;
+        selectedRecipientsDiv.appendChild(tag);
+      });
+
+      // Add remove event listeners
+      document
+        .querySelectorAll(".recipient-tag .remove")
+        .forEach((removeBtn) => {
+          removeBtn.addEventListener("click", function () {
+            const id = parseInt(this.getAttribute("data-id"));
+            selectedRecipients = selectedRecipients.filter((r) => r.id !== id);
+            updateSelectedRecipients();
+            updateRecipientsInput();
+          });
+        });
+    } else {
+      noRecipientsDiv.style.display = "block";
+      selectedRecipientsDiv.innerHTML =
+        '<div class="text-muted" id="no-recipients">No recipients selected</div>';
+    }
+  }
+
+  function updateRecipientsInput() {
+    const ids = selectedRecipients.map((r) => r.id);
+    // Clear any existing recipient inputs
+    document.querySelectorAll('input[name="recipients"]').forEach((input) => {
+      if (input.id !== "recipients-input") input.remove();
+    });
+
+    // Create multiple hidden inputs for proper form submission as list
+    const form = document.getElementById("message-form");
+    ids.forEach((id) => {
+      const hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.name = "recipients";
+      hiddenInput.value = id;
+      form.appendChild(hiddenInput);
+    });
+
+    // Also update the main input for reference (not used in submission)
+    recipientsInput.value = ids.join(",");
+  }
+
+  // Member search
+  const searchInput = document.getElementById("recipient-search");
+  const searchResults = document.getElementById("search-results");
+  let searchTimeout;
+
+  searchInput.addEventListener("input", function () {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+
+    if (query.length < 2) {
+      searchResults.style.display = "none";
+      return;
+    }
+
+    // Show loading indicator
+    searchResults.innerHTML =
+      '<div class="search-result-item text-muted"><i class="fas fa-spinner fa-spin me-2"></i> Searching members...</div>';
+    searchResults.style.display = "block";
+
+    searchTimeout = setTimeout(() => {
+      $.ajax({
+        url: '{% url "ajax_search_members" %}',
+        data: { q: query },
+        success: function (data) {
+          if (data.results && data.results.length > 0) {
+            searchResults.innerHTML = "";
+            data.results.forEach((member) => {
+              // Skip if already selected
+              if (selectedRecipients.some((r) => r.id === member.id)) {
+                return;
+              }
+
+              const item = document.createElement("div");
+              item.className = "search-result-item";
+              item.innerHTML = `
+                                <div class="d-flex align-items-center">
+                                    <img src="${member.photo_url || "/static/images/default_profile.png"}" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 40px; height: 40px; object-fit: cover;"
+                                         onerror="this.src='/static/images/default_profile.png'">
+                                    <div>
+                                        <div class="fw-bold">${member.name}</div>
+                                        <small class="text-muted">${member.phone || "No phone"}</small>
+                                    </div>
+                                </div>
+                            `;
+              item.addEventListener("click", function () {
+                if (!selectedRecipients.some((r) => r.id === member.id)) {
+                  selectedRecipients.push({
+                    id: member.id,
+                    name: member.name,
+                    phone: member.phone,
+                  });
+                  updateSelectedRecipients();
+                  updateRecipientsInput();
+                }
+                searchInput.value = "";
+                searchResults.style.display = "none";
+              });
+              searchResults.appendChild(item);
+            });
+
+            if (searchResults.children.length === 0) {
+              searchResults.innerHTML =
+                '<div class="search-result-item text-muted">All matching members already selected</div>';
+            }
+            searchResults.style.display = "block";
+          } else {
+            searchResults.innerHTML =
+              '<div class="search-result-item text-muted"><i class="fas fa-info-circle me-1"></i> No members found matching "' +
+              query +
+              '"</div>';
+            searchResults.style.display = "block";
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("Search error:", error);
+          searchResults.innerHTML =
+            '<div class="search-result-item text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Error searching members. Please try again.</div>';
+          searchResults.style.display = "block";
+        },
+      });
+    }, 300);
+  });
+
+  // Keyboard support for search
+  searchInput.addEventListener("keydown", function (e) {
+    // Enter key - trigger search explicitly
+    if (e.key === "Enter") {
+      e.preventDefault();
+      clearTimeout(searchTimeout);
+      const query = this.value.trim();
+
+      if (query.length >= 2) {
+        // Trigger the search immediately
+        this.dispatchEvent(new Event("input"));
+      }
+    }
+    // Escape key - close search results
+    else if (e.key === "Escape") {
+      searchResults.style.display = "none";
+      this.blur();
+    }
+  });
+
+  // Click outside to close search results
+  document.addEventListener("click", function (e) {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+      searchResults.style.display = "none";
+    }
+  });
+
+  // Quick selection buttons
+  document
+    .getElementById("select-active")
+    .addEventListener("click", function () {
+      // Fetch active members via AJAX
+      const btn = this;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+
+      $.ajax({
+        url: '{% url "ajax_search_members" %}',
+        data: { q: "", status: "active" },
+        success: function (data) {
+          if (data.results && data.results.length > 0) {
+            data.results.forEach((member) => {
+              if (!selectedRecipients.some((r) => r.id === member.id)) {
+                selectedRecipients.push({
+                  id: member.id,
+                  name: member.name,
+                  phone: member.phone,
+                });
+              }
+            });
+            updateSelectedRecipients();
+            updateRecipientsInput();
+
+            // Show success message
+            const alertDiv = document.createElement("div");
+            alertDiv.className =
+              "alert alert-success alert-dismissible fade show mt-2";
+            alertDiv.innerHTML = `
+                        <i class="fas fa-check-circle me-1"></i> Added ${data.results.length} active members
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+            document
+              .getElementById("recipients-section")
+              .insertBefore(
+                alertDiv,
+                document.getElementById("recipients-section").firstChild,
+              );
+            setTimeout(() => alertDiv.remove(), 3000);
+          }
+          btn.disabled = false;
+          btn.innerHTML =
+            '<i class="fas fa-user-check me-1"></i> Select Active Members';
+        },
+        error: function () {
+          alert("Error loading active members. Please try again.");
+          btn.disabled = false;
+          btn.innerHTML =
+            '<i class="fas fa-user-check me-1"></i> Select Active Members';
+        },
+      });
+    });
+
+  document.getElementById("select-all").addEventListener("click", function () {
+    // Confirm before selecting all members
+    if (!confirm("This will select ALL members in the database. Continue?")) {
+      return;
+    }
+
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+
+    $.ajax({
+      url: '{% url "ajax_search_members" %}',
+      data: { q: "", all: "true" },
+      success: function (data) {
+        if (data.results && data.results.length > 0) {
+          data.results.forEach((member) => {
+            if (!selectedRecipients.some((r) => r.id === member.id)) {
+              selectedRecipients.push({
+                id: member.id,
+                name: member.name,
+                phone: member.phone,
+              });
+            }
+          });
+          updateSelectedRecipients();
+          updateRecipientsInput();
+
+          // Show success message
+          const alertDiv = document.createElement("div");
+          alertDiv.className =
+            "alert alert-success alert-dismissible fade show mt-2";
+          alertDiv.innerHTML = `
+                        <i class="fas fa-check-circle me-1"></i> Added ${data.results.length} members
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+          document
+            .getElementById("recipients-section")
+            .insertBefore(
+              alertDiv,
+              document.getElementById("recipients-section").firstChild,
+            );
+          setTimeout(() => alertDiv.remove(), 3000);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-users me-1"></i> Select All Members';
+      },
+      error: function () {
+        alert("Error loading members. Please try again.");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-users me-1"></i> Select All Members';
+      },
+    });
+  });
+
+  document.getElementById("clear-all").addEventListener("click", function () {
+    selectedRecipients = [];
+    updateSelectedRecipients();
+    updateRecipientsInput();
+  });
+
+  // Message preview
+  const contentTextarea = document.getElementById("content");
+  const previewDiv = document.getElementById("message-preview");
+
+  contentTextarea.addEventListener("input", function () {
+    previewDiv.innerHTML =
+      this.value.replace(/\n/g, "<br>") ||
+      '<p class="text-muted mb-0">Your message will appear here...</p>';
+  });
+
+  // Form submission
+  document
+    .getElementById("message-form")
+    .addEventListener("submit", function (e) {
+      const action = e.submitter ? e.submitter.value : "send";
+
+      // Always ensure hidden recipient inputs are in sync.
+      updateRecipientsInput();
+
+      if (action !== "send") {
+        return;
+      }
+
+      const subject = document.getElementById("subject").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const messageType = document.querySelector(
+        'input[name="message_type"]:checked',
+      ).value;
+
+      if (!subject) {
+        e.preventDefault();
+        alert("Please enter a subject");
+        return;
+      }
+
+      if (!content) {
+        e.preventDefault();
+        alert("Please enter message content");
+        return;
+      }
+
+      if (messageType !== "broadcast" && selectedRecipients.length === 0) {
+        e.preventDefault();
+        alert("Please select at least one recipient");
+      }
+    });
+
+  // Template Selector functionality
+  const templateSelector = document.getElementById("template-selector");
+  const subjectInput = document.getElementById("subject");
+  const contentInput = document.getElementById("content");
+  const manageTemplatesBtn = document.getElementById("manage-templates");
+
+  templateSelector.addEventListener("change", function () {
+    if (this.value) {
+      const selectedOption = this.options[this.selectedIndex];
+      const subject = selectedOption.getAttribute("data-subject");
+      const content = selectedOption.getAttribute("data-content");
+
+      subjectInput.value = subject || "";
+      contentInput.value = content || "";
+
+      // Trigger preview update
+      contentInput.dispatchEvent(new Event("input"));
+
+      // Show success message
+      const alert = document.createElement("div");
+      alert.className = "alert alert-info alert-dismissible fade show mt-2";
+      alert.innerHTML = `
+        <i class="fas fa-info-circle me-1"></i> Template loaded. Edit as needed before sending.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      contentInput.parentElement.insertBefore(alert, contentInput.nextSibling);
+      setTimeout(() => alert.remove(), 4000);
+    }
+  });
+
+  manageTemplatesBtn.addEventListener("click", function () {
+    window.open("{% url 'admin:messaging_messagetemplate_changelist' %}", "_blank");
+  });
+</script>
+{% endblock %}
