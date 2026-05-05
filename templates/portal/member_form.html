@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5 px-2 px-md-4">
+    <div class="row">
+        <div class="col-12 col-lg-8 offset-lg-2">
+            <!-- Header -->
+            <div class="mb-4">
+                <h1 class="h3 mb-2">
+                    {% if is_add %}
+                        <i class="bi bi-person-plus"></i> Register New Youth Member
+                    {% else %}
+                        <i class="bi bi-pencil-square"></i> Edit Member Profile
+                    {% endif %}
+                </h1>
+                <p class="text-muted">All fields are optional - fill in what you know</p>
+            </div>
+
+            <!-- Messages/Alerts -->
+            {% if messages %}
+                <div class="alert-container mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Form -->
+            <form method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Personal Information Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-person"></i> Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    First Name
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    Last Name
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.middle_name.id_for_label }}" class="form-label">
+                                    Middle Name
+                                    <small class="text-muted">(Optional)</small>
+                                </label>
+                                {{ form.middle_name }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.gender.id_for_label }}" class="form-label">
+                                    Gender
+                                </label>
+                                {{ form.gender }}
+                                {% if form.gender.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.gender.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">
+                                    Date of Birth
+                                </label>
+                                {{ form.date_of_birth }}
+                                {% if form.date_of_birth.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.date_of_birth.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted">Format: YYYY-MM-DD</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.photo.id_for_label }}" class="form-label">
+                                    Profile Photo
+                                    <small class="text-muted">(Optional)</small>
+                                </label>
+                                {{ form.photo }}
+                                {% if form.photo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.photo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-1">Accepted formats: JPG, PNG, GIF</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-telephone"></i> Contact Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    Email Address
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                                    Phone Number
+                                </label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone_number.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.alternate_phone.id_for_label }}" class="form-label">
+                                    Alternate Phone
+                                    <small class="text-muted">(Optional)</small>
+                                </label>
+                                {{ form.alternate_phone }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.address.id_for_label }}" class="form-label">
+                                Street Address
+                            </label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.address.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.city.id_for_label }}" class="form-label">
+                                    City
+                                </label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.city.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.state.id_for_label }}" class="form-label">
+                                    State/Region
+                                </label>
+                                {{ form.state }}
+                                {% if form.state.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.state.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.postal_code.id_for_label }}" class="form-label">
+                                    Postal Code
+                                </label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.postal_code.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Church Information Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-building"></i> Church Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.date_joined.id_for_label }}" class="form-label">
+                                    Date Joined
+                                </label>
+                                {{ form.date_joined }}
+                                {% if form.date_joined.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.date_joined.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.baptism_date.id_for_label }}" class="form-label">
+                                    Baptism Date
+                                    <small class="text-muted">(Optional)</small>
+                                </label>
+                                {{ form.baptism_date }}
+                                {% if form.baptism_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.baptism_date.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">
+                                    Member Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.status.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.department.id_for_label }}" class="form-label">
+                                    Department/Group
+                                    <small class="text-muted">(Optional)</small>
+                                </label>
+                                {{ form.department }}
+                                <small class="text-muted d-block mt-1">e.g., Youth, College, Young Adults</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.spiritual_gifts.id_for_label }}" class="form-label">
+                                Spiritual Gifts
+                                <small class="text-muted">(Optional)</small>
+                            </label>
+                            {{ form.spiritual_gifts }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Emergency Contact</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label">
+                                    Name
+                                </label>
+                                {{ form.emergency_contact_name }}
+                                {% if form.emergency_contact_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.emergency_contact_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label">
+                                    Phone
+                                </label>
+                                {{ form.emergency_contact_phone }}
+                                {% if form.emergency_contact_phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.emergency_contact_phone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.emergency_contact_relationship.id_for_label }}" class="form-label">
+                                Relationship
+                            </label>
+                            {{ form.emergency_contact_relationship }}
+                            {% if form.emergency_contact_relationship.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.emergency_contact_relationship.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted d-block mt-1">e.g., Parent, Sibling, Guardian, Spouse</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Additional Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.occupation.id_for_label }}" class="form-label">
+                                    Occupation
+                                    <small class="text-muted">(Optional)</small>
+                                </label>
+                                {{ form.occupation }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.school.id_for_label }}" class="form-label">
+                                    School/University
+                                    <small class="text-muted">(Optional)</small>
+                                </label>
+                                {{ form.school }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.talents.id_for_label }}" class="form-label">
+                                Talents & Skills
+                                <small class="text-muted">(Optional)</small>
+                            </label>
+                            {{ form.talents }}
+                            <small class="text-muted d-block mt-1">Used for planning events and activities</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                Notes
+                                <small class="text-muted">(Optional)</small>
+                            </label>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-2 mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        {% if is_add %}
+                            <i class="bi bi-check-circle"></i> Register Member
+                        {% else %}
+                            <i class="bi bi-save"></i> Save Changes
+                        {% endif %}
+                    </button>
+                    <a href="{% if member %}{% url 'member_detail' member.pk %}{% else %}{% url 'admin_portal' %}{% endif %}" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </div>
+
+                <!-- Required Field Note -->
+                <div class="alert alert-light border border-secondary">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> <strong>All fields are optional</strong> - you can fill in information as you gather it
+                    </small>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header {
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+    
+    .text-danger {
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

@@ -11,8 +11,11 @@
         <a href="{% url 'member_messages' member.id %}" class="btn btn-primary me-2">
             <i class="fas fa-comment me-1"></i> Send Message
         </a>
-        <a href="/admin/members/member/{{ member.id }}/change/" target="_blank" class="btn btn-secondary">
+        <a href="{% url 'edit_member' member.id %}" class="btn btn-warning me-2">
             <i class="fas fa-edit me-1"></i> Edit
+        </a>
+        <a href="/admin/members/member/{{ member.id }}/change/" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-cog me-1"></i> Admin
         </a>
     </div>
 </div>

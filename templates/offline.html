@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Offline - Church Youth Management{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="mb-4">
+                <i class="fas fa-wifi-off fa-5x text-warning mb-3"></i>
+            </div>
+            
+            <h1 class="h2 mb-3">You're Offline</h1>
+            
+            <p class="text-muted lead mb-4">
+                It looks like you've lost your internet connection. Some features may not be available right now.
+            </p>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Good news!</strong> Previously loaded pages are still available. You can view cached data while offline.
+            </div>
+            
+            <div class="mt-4">
+                <button onclick="location.reload()" class="btn btn-primary btn-lg">
+                    <i class="fas fa-redo me-2"></i> Try Again
+                </button>
+                <a href="/" class="btn btn-secondary btn-lg ms-2">
+                    <i class="fas fa-home me-2"></i> Go Home
+                </a>
+            </div>
+            
+            <hr class="my-4">
+            
+            <h5 class="mt-4">What you can do:</h5>
+            <ul class="list-unstyled text-start">
+                <li class="mb-2">
+                    <i class="fas fa-check text-success me-2"></i> View previously loaded pages
+                </li>
+                <li class="mb-2">
+                    <i class="fas fa-check text-success me-2"></i> Browse member information
+                </li>
+                <li class="mb-2">
+                    <i class="fas fa-times text-danger me-2"></i> Send new messages (will sync when online)
+                </li>
+                <li class="mb-2">
+                    <i class="fas fa-times text-danger me-2"></i> Add new members (will sync when online)
+                </li>
+            </ul>
+            
+            <p class="text-muted small mt-4">
+                We'll automatically sync your changes when your connection is restored.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    
+    .container {
+        padding: 2rem;
+    }
+</style>
+{% endblock %}

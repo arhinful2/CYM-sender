@@ -192,6 +192,67 @@ def member_detail(request, pk):
 
 
 @staff_member_required
+def add_member(request):
+    """Add new member via website form"""
+    from members.forms import MemberRegistrationForm
+    
+    if request.method == 'POST':
+        form = MemberRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            member = form.save(commit=False)
+            member.created_by = request.user
+            member.save()
+            messages.success(request, f'✓ {member.full_name()} has been added successfully!')
+            return redirect('member_detail', pk=member.pk)
+        else:
+            # Show errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = MemberRegistrationForm()
+
+    context = {
+        'form': form,
+        'title': 'Register New Member',
+        'is_add': True,
+    }
+    return render(request, 'portal/member_form.html', context)
+
+
+@staff_member_required
+def edit_member(request, pk):
+    """Edit existing member"""
+    from members.forms import MemberRegistrationForm
+    
+    member = get_object_or_404(Member, pk=pk)
+    
+    if request.method == 'POST':
+        form = MemberRegistrationForm(request.POST, request.FILES, instance=member)
+        if form.is_valid():
+            member = form.save(commit=False)
+            member.updated_by = request.user  # Note: you may want to add this field to Member model
+            member.save()
+            messages.success(request, f'✓ {member.full_name()} has been updated successfully!')
+            return redirect('member_detail', pk=member.pk)
+        else:
+            # Show errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = MemberRegistrationForm(instance=member)
+
+    context = {
+        'form': form,
+        'member': member,
+        'title': f'Edit {member.full_name()}',
+        'is_add': False,
+    }
+    return render(request, 'portal/member_form.html', context)
+
+
+@staff_member_required
 def messaging_dashboard(request):
     """Messaging dashboard"""
     from messaging.models import MessageTemplate
@@ -489,7 +550,7 @@ def compose_message(request):
                 phone = str(member.phone_number)
                 sms_result = MessageService.send_sms(
                     phone,
-                    f"{subject}\n\n{content}\n\n- {message.sender.get_full_name() or message.sender.username}"
+                    f"{subject}\n\n{content}"
                 )
 
                 # Create SMS Log

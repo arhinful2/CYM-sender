@@ -24,27 +24,27 @@ class Member(models.Model):
         ('transferred', 'Transferred'),
     ]
     
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
     middle_name = models.CharField(max_length=100, blank=True)
     
     # Personal Information
-    date_of_birth = models.DateField()
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    email = models.EmailField(unique=True)
-    phone_number = PhoneNumberField(unique=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    email = models.EmailField(unique=True, blank=True, null=True)
+    phone_number = PhoneNumberField(unique=True, blank=True)
     alternate_phone = PhoneNumberField(blank=True)
     
     # Address
-    address = models.TextField()
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    postal_code = models.CharField(max_length=20)
+    address = models.TextField(blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
     
     # Church Information
-    date_joined = models.DateField(default=date.today)
+    date_joined = models.DateField(default=date.today, blank=True, null=True)
     baptism_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', blank=True)
     department = models.CharField(max_length=100, blank=True)
     spiritual_gifts = models.TextField(blank=True)
     
@@ -52,9 +52,9 @@ class Member(models.Model):
     photo = models.ImageField(upload_to=member_photo_path, blank=True, null=True)
     
     # Emergency Contact
-    emergency_contact_name = models.CharField(max_length=200)
-    emergency_contact_phone = PhoneNumberField()
-    emergency_contact_relationship = models.CharField(max_length=100)
+    emergency_contact_name = models.CharField(max_length=200, blank=True)
+    emergency_contact_phone = PhoneNumberField(blank=True)
+    emergency_contact_relationship = models.CharField(max_length=100, blank=True)
     
     # Additional Information
     occupation = models.CharField(max_length=100, blank=True)
@@ -66,6 +66,7 @@ class Member(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='members_created')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='members_updated')
     
     class Meta:
         ordering = ['last_name', 'first_name']
