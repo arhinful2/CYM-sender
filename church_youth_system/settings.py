@@ -27,7 +27,22 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'yourdomain.com',
+    '.vercel.app',
+]
+
+extra_allowed_hosts = config('ALLOWED_HOSTS', default='')
+if extra_allowed_hosts:
+    ALLOWED_HOSTS.extend(
+        host.strip() for host in extra_allowed_hosts.split(',') if host.strip()
+    )
+
+vercel_url = config('VERCEL_URL', default='').strip()
+if vercel_url:
+    ALLOWED_HOSTS.append(vercel_url)
 
 # Application definition
 INSTALLED_APPS = [
