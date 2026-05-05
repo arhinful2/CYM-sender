@@ -178,6 +178,26 @@ if not DEBUG:
 # Set these in Vercel dashboard when using Vercel Blob or other provider
 VERCEL_BLOB_TOKEN = config('VERCEL_BLOB_TOKEN', default='')
 BLOB_READ_WRITE_TOKEN = config('BLOB_READ_WRITE_TOKEN', default='')
+VERCEL_BLOB_BASE_URL = config('VERCEL_BLOB_BASE_URL', default='')
+USE_VERCEL_BLOB_STORAGE = config('USE_VERCEL_BLOB_STORAGE', default=False, cast=bool)
+
+blob_token = BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        if not DEBUG else
+        'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
+
+if USE_VERCEL_BLOB_STORAGE and blob_token:
+    STORAGES['default'] = {
+        'BACKEND': 'church_youth_system.storage_backends.VercelBlobStorage',
+    }
 
 # If you plan to use S3-compatible storage (django-storages + boto3),
 # add `DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'`
