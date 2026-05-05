@@ -6,12 +6,9 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Dashboard</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-<<<<<<< HEAD
         <a href="{% url 'add_member' %}" class="btn btn-success me-2">
             <i class="fas fa-user-plus me-1"></i> Add Member
         </a>
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         <a href="{% url 'compose_message' %}" class="btn btn-primary">
             <i class="fas fa-paper-plane me-1"></i> New Message
         </a>
@@ -116,19 +113,12 @@
                                 <th>Type</th>
                                 <th>Date</th>
                                 <th>Responses</th>
-<<<<<<< HEAD
                                 <th></th>
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                             </tr>
                         </thead>
                         <tbody>
                             {% for message in recent_messages %}
-<<<<<<< HEAD
                             <tr>
-=======
-                            <tr style="cursor: pointer;" onclick="window.location='{% url 'message_responses' message.id %}'">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                                 <td>{{ message.subject|truncatechars:30 }}</td>
                                 <td>
                                     <span class="badge {% if message.is_broadcast %}bg-primary{% else %}bg-info{% endif %}">
@@ -139,7 +129,6 @@
                                 <td>
                                     <span class="badge bg-success">{{ message.responses.count }}</span>
                                 </td>
-<<<<<<< HEAD
                                     <td class="text-end">
                                         <div class="d-flex flex-wrap justify-content-end gap-2">
                                             <a href="{% url 'message_responses' message.id %}" class="btn btn-sm btn-outline-primary">
@@ -158,12 +147,6 @@
                             {% empty %}
                             <tr>
                                 <td colspan="5" class="text-center">No messages sent yet</td>
-=======
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center">No messages sent yet</td>
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -192,11 +175,7 @@
                 </a>
             </div>
             <div class="col-md-3 mb-3">
-<<<<<<< HEAD
                 <a href="{% url 'add_member' %}"  class="btn btn-success w-100 py-3 h-100">
-=======
-                <a href="/admin/members/member/add/" target="_blank" class="btn btn-success w-100 py-3 h-100">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                     <i class="fas fa-user-plus fa-2x mb-2"></i><br>
                     Add Member
                 </a>

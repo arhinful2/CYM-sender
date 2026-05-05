@@ -4,7 +4,6 @@
 
 {% block extra_css %}
 <style>
-<<<<<<< HEAD
     .messaging-page .header-card {
         border: none;
         border-radius: 0.75rem;
@@ -32,34 +31,10 @@
         width: 30px;
         height: 30px;
         display: inline-flex;
-=======
-    .message-card {
-        border-left: 4px solid #3498db;
-        transition: all 0.3s;
-    }
-    
-    .message-card:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .message-card.broadcast {
-        border-left-color: #9b59b6;
-    }
-    
-    .message-card.individual {
-        border-left-color: #2ecc71;
-    }
-    
-    .response-badge {
-        width: 30px;
-        height: 30px;
-        display: flex;
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         align-items: center;
         justify-content: center;
         border-radius: 50%;
     }
-<<<<<<< HEAD
 
     .messaging-page .stat-card {
         border: none;
@@ -72,13 +47,10 @@
             font-size: 1.35rem;
         }
     }
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 </style>
 {% endblock %}
 
 {% block content %}
-<<<<<<< HEAD
 <div class="messaging-page">
     <div class="card header-card mb-4">
         <div class="card-body p-4">
@@ -124,64 +96,30 @@
         <div class="row g-3">
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
-=======
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">
-        <i class="fas fa-comments me-2"></i>Messaging Center
-    </h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'compose_message' %}" class="btn btn-primary">
-            <i class="fas fa-paper-plane me-1"></i> Compose Message
-        </a>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Statistics -->
-    <div class="col-md-12 mb-4">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card text-center">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                     <div class="card-body">
                         <h3>{{ sent_messages.count }}</h3>
                         <p class="text-muted mb-0">Total Messages</p>
                     </div>
                 </div>
             </div>
-<<<<<<< HEAD
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
-=======
-            <div class="col-md-3">
-                <div class="card text-center">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                     <div class="card-body">
                         <h3>{{ messages_with_responses.count }}</h3>
                         <p class="text-muted mb-0">With Responses</p>
                     </div>
                 </div>
             </div>
-<<<<<<< HEAD
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
-=======
-            <div class="col-md-3">
-                <div class="card text-center">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                     <div class="card-body">
                         <h3>{{ recent_responses|length }}</h3>
                         <p class="text-muted mb-0">Recent Responses</p>
                     </div>
                 </div>
             </div>
-<<<<<<< HEAD
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
-=======
-            <div class="col-md-3">
-                <div class="card text-center">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                     <div class="card-body">
                         <h3>0</h3>
                         <p class="text-muted mb-0">Unread</p>
@@ -192,11 +130,7 @@
     </div>
 
     <!-- Recent Messages -->
-<<<<<<< HEAD
     <div class="col-12 col-xl-8">
-=======
-    <div class="col-md-8">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="fas fa-history me-1"></i> Recent Messages</span>
@@ -223,11 +157,7 @@
                                 <h6 class="mb-1">
                                     {{ message.subject }}
                                     {% if message.is_broadcast %}
-<<<<<<< HEAD
                                     <span class="badge bg-primary ms-1">Broadcast</span>
-=======
-                                    <span class="badge bg-purple ms-1">Broadcast</span>
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                                     {% else %}
                                     <span class="badge bg-success ms-1">Individual</span>
                                     {% endif %}
@@ -252,7 +182,6 @@
                                     {{ message.responses.count }}
                                 </span>
                                 {% endif %}
-<<<<<<< HEAD
                                 <div class="mt-2">
                                     <form method="post" action="{% url 'delete_message' message.id %}" onsubmit="return confirm('Move this message to trash?');">
                                         {% csrf_token %}
@@ -262,8 +191,6 @@
                                         </button>
                                     </form>
                                 </div>
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                             </div>
                         </div>
                     </a>
@@ -284,11 +211,7 @@
     </div>
 
     <!-- Recent Responses -->
-<<<<<<< HEAD
     <div class="col-12 col-xl-4">
-=======
-    <div class="col-md-4">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-reply me-1"></i> Recent Responses
@@ -315,7 +238,6 @@
                                class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-eye"></i>
                             </a>
-<<<<<<< HEAD
                             <form method="post" action="{% url 'delete_message_response' response.id %}" class="ms-1" onsubmit="return confirm('Move this response to trash?');">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{% url 'messaging_dashboard' %}">
@@ -323,8 +245,6 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                         </div>
                     </div>
                     {% endfor %}
@@ -339,8 +259,5 @@
         </div>
     </div>
 </div>
-<<<<<<< HEAD
 </div>
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 {% endblock %}

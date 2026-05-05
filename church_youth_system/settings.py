@@ -27,11 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-<<<<<<< HEAD
 ALLOWED_HOSTS = ['localhost', '127.0.0.1','yourdomain.com']
-=======
-ALLOWED_HOSTS = ['localhost', '127.0.0.1','cym-sender.onrender.com']
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 
 # Application definition
 INSTALLED_APPS = [
@@ -59,10 +55,6 @@ INSTALLED_APPS = [
     'prayer',
     'giving',
     'notifications',
-<<<<<<< HEAD
-=======
-    'pwa'
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 ]
 
 MIDDLEWARE = [
@@ -189,27 +181,4 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-<<<<<<< HEAD
-=======
-    
-    
-PWA_APP_NAME = 'Church Youth Management'
-PWA_APP_DESCRIPTION = "Manage your church youth events and messaging"
-PWA_APP_THEME_COLOR = '#000000'
-PWA_APP_BACKGROUND_COLOR = '#ffffff'
-PWA_APP_DISPLAY = 'standalone'
-PWA_APP_SCOPE = '/'
-PWA_APP_START_URL = '/'
-PWA_APP_ICONS = [
-    {
-        'src': '/static/images/icons-192.png',
-        'sizes': '192x192'
-    },
-    {
-        'src': '/static/images/icons-512.png',
-        'sizes': '512x512'
-    }
-]
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 

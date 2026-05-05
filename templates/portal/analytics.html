@@ -9,14 +9,11 @@
         height: 300px;
         margin-bottom: 20px;
     }
-<<<<<<< HEAD
 
     .metric-card {
         border: 0;
         box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.08);
     }
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 </style>
 {% endblock %}
 
@@ -37,11 +34,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-<<<<<<< HEAD
                         <div class="card bg-primary text-white mb-3 metric-card">
-=======
-                        <div class="card bg-primary text-white mb-3">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                             <div class="card-body text-center">
                                 <h3>{{ total_members }}</h3>
                                 <p class="mb-0">Total Members</p>
@@ -49,11 +42,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-<<<<<<< HEAD
                         <div class="card bg-success text-white mb-3 metric-card">
-=======
-                        <div class="card bg-success text-white mb-3">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                             <div class="card-body text-center">
                                 <h3>{{ active_members }}</h3>
                                 <p class="mb-0">Active Members</p>
@@ -63,11 +52,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-<<<<<<< HEAD
                         <div class="card bg-warning text-white mb-3 metric-card">
-=======
-                        <div class="card bg-warning text-white mb-3">
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                             <div class="card-body text-center">
                                 <h3>{{ inactive_members }}</h3>
                                 <p class="mb-0">Inactive Members</p>
@@ -75,15 +60,9 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-<<<<<<< HEAD
                         <div class="card bg-info text-white mb-3 metric-card">
                             <div class="card-body text-center">
                                 <h3>{{ visitor_members }}</h3>
-=======
-                        <div class="card bg-info text-white mb-3">
-                            <div class="card-body text-center">
-                                <h3>0</h3>
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                                 <p class="mb-0">Visitors</p>
                             </div>
                         </div>
@@ -102,7 +81,6 @@
                 </div>
             </div>
         </div>
-<<<<<<< HEAD
 
         <div class="card mb-4">
             <div class="card-header">
@@ -114,8 +92,6 @@
                 </div>
             </div>
         </div>
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     </div>
 
     <!-- Message Statistics -->
@@ -174,7 +150,6 @@
                 </div>
             </div>
         </div>
-<<<<<<< HEAD
 
         <div class="card mb-4">
             <div class="card-header">
@@ -235,11 +210,6 @@
         </div>
     </div>
 
-=======
-    </div>
-</div>
-
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 <!-- Recent Activity -->
 <div class="row">
     <div class="col-md-12">
@@ -259,7 +229,6 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-<<<<<<< HEAD
     const genderLabels = JSON.parse('{{ gender_chart_labels|escapejs }}');
     const genderValues = JSON.parse('{{ gender_chart_data|escapejs }}');
     const ageLabels = JSON.parse('{{ age_chart_labels|escapejs }}');
@@ -271,26 +240,14 @@
     const weekLabels = JSON.parse('{{ attendance_week_labels|escapejs }}');
     const weekValues = JSON.parse('{{ attendance_week_data|escapejs }}');
 
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     // Gender Chart
     const genderCtx = document.getElementById('genderChart').getContext('2d');
     const genderChart = new Chart(genderCtx, {
         type: 'pie',
         data: {
-<<<<<<< HEAD
             labels: genderLabels,
             datasets: [{
                 data: genderValues,
-=======
-            labels: ['Male', 'Female', 'Other'],
-            datasets: [{
-                data: [
-                    {{ gender_stats.0.count|default:0 }},
-                    {{ gender_stats.1.count|default:0 }},
-                    {{ gender_stats.2.count|default:0 }}
-                ],
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                 backgroundColor: [
                     '#3498db',
                     '#e74c3c',
@@ -309,22 +266,10 @@
     const ageChart = new Chart(ageCtx, {
         type: 'bar',
         data: {
-<<<<<<< HEAD
             labels: ageLabels,
             datasets: [{
                 label: 'Number of Members',
                 data: ageValues,
-=======
-            labels: ['13-17', '18-25', '26-35', '36+'],
-            datasets: [{
-                label: 'Number of Members',
-                data: [
-                    {{ age_groups.13_17 }},
-                    {{ age_groups.18_25 }},
-                    {{ age_groups.26_35 }},
-                    {{ age_groups.36_plus }}
-                ],
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                 backgroundColor: '#9b59b6'
             }]
         },
@@ -341,7 +286,6 @@
             }
         }
     });
-<<<<<<< HEAD
 
     const serviceCtx = document.getElementById('serviceChart').getContext('2d');
     const serviceChart = new Chart(serviceCtx, {
@@ -411,7 +355,5 @@
             }
         }
     });
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 </script>
 {% endblock %}

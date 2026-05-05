@@ -4,12 +4,8 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
 from django.db.models import Q
 from members.models import Member
-<<<<<<< HEAD
 from messaging.models import Message, MessageResponse, Conversation, SMSLog
 from messaging.services import MessageService
-=======
-from messaging.models import Message, MessageResponse, Conversation
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils import timezone  # ADD THIS IMPORT
@@ -18,7 +14,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponseForbidden
-<<<<<<< HEAD
 from django.http import HttpResponseBadRequest
 from datetime import date, timedelta
 import re
@@ -31,15 +26,6 @@ from members.models import Attendance  # If not already imported
 from django.shortcuts import redirect  # If not already imported
 from django.db.models import Case, When, Value, IntegerField
 from django.utils import timezone as django_timezone
-=======
-from datetime import date, timedelta
-
-import csv
-from django.http import HttpResponse # Make sure this import exists
-from datetime import date  # If not already imported
-from members.models import Attendance  # If not already imported
-from django.shortcuts import redirect  # If not already imported
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 
 
 def home(request):
@@ -49,10 +35,7 @@ def home(request):
     else:
         return redirect('login')
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 def staff_required(view_func):
     """Decorator to ensure user is staff member"""
     decorated_view_func = user_passes_test(
@@ -61,10 +44,7 @@ def staff_required(view_func):
     )(view_func)
     return decorated_view_func
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 def permission_required(permission_name):
     """Decorator to check specific permissions"""
     def decorator(view_func):
@@ -81,26 +61,16 @@ def permission_required(permission_name):
     return decorator
 
 # Use decorators in your views
-<<<<<<< HEAD
 
 
 @staff_required
 @permission_required('can_view_members')
 @staff_member_required
 def admin_portal(request):
-=======
-@staff_required
-@permission_required('can_view_members')
-
-
-@staff_member_required
-def admin_portal(request): 
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     """Main admin portal dashboard"""
     total_members = Member.objects.count()
     active_members = Member.objects.filter(status='active').count()
     recent_members = Member.objects.order_by('-date_joined')[:5]
-<<<<<<< HEAD
 
     # Message statistics
     total_messages = Message.objects.filter(is_deleted=False).count()
@@ -111,16 +81,6 @@ def admin_portal(request):
         is_deleted=False).select_related(
         'respondent', 'message').order_by('-created_at')[:5]
 
-=======
-    
-    # Message statistics
-    total_messages = Message.objects.count()
-    recent_messages = Message.objects.order_by('-created_at')[:5]
-    
-    # Recent responses
-    recent_responses = MessageResponse.objects.select_related('respondent', 'message').order_by('-created_at')[:5]
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     context = {
         'total_members': total_members,
         'active_members': active_members,
@@ -132,7 +92,6 @@ def admin_portal(request):
     return render(request, 'portal/dashboard.html', context)
 
 
-<<<<<<< HEAD
 @staff_member_required
 def member_search(request):
     """Advanced member search with AI-like suggestions"""
@@ -193,33 +152,10 @@ def member_search(request):
     quick_members = Member.objects.filter(
         status='active').order_by('-date_joined', 'last_name')[:8]
 
-=======
-
-
-@staff_member_required
-def member_search(request):
-    """Advanced member search with AI-like suggestions"""
-    query = request.GET.get('q', '')
-    members = Member.objects.all()
-    
-    if query:
-        # Search in multiple fields with OR condition
-        members = members.filter(
-            Q(first_name__icontains=query) |
-            Q(last_name__icontains=query) |
-            Q(middle_name__icontains=query) |
-            Q(phone_number__icontains=query) |
-            Q(email__icontains=query) |
-            Q(address__icontains=query) |
-            Q(city__icontains=query)
-        ).distinct()
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     # Pagination
     paginator = Paginator(members, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-<<<<<<< HEAD
 
     context = {
         'query': query,
@@ -228,28 +164,14 @@ def member_search(request):
         'page_obj': page_obj,
         'total_results': members.count(),
         'quick_members': quick_members,
-=======
-    
-    context = {
-        'query': query,
-        'page_obj': page_obj,
-        'total_results': members.count(),
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     }
     return render(request, 'portal/member_search.html', context)
 
 
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 @staff_member_required
 def member_detail(request, pk):
     """Member detail view"""
     member = get_object_or_404(Member, pk=pk)
-<<<<<<< HEAD
 
     # Get attendance records
     attendance = member.attendances.filter(is_deleted=False)[:10]
@@ -260,18 +182,6 @@ def member_detail(request, pk):
     # Get message conversations
     conversations = member.conversations.select_related('message').all()[:10]
 
-=======
-    
-    # Get attendance records
-    attendance = member.attendances.all()[:10]
-    
-    # Get family members
-    family = member.family_members.all()
-    
-    # Get message conversations
-    conversations = member.conversations.select_related('message').all()[:10]
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     context = {
         'member': member,
         'attendance': attendance,
@@ -280,7 +190,6 @@ def member_detail(request, pk):
     }
     return render(request, 'portal/member_detail.html', context)
 
-<<<<<<< HEAD
 
 @staff_member_required
 def add_member(request):
@@ -364,27 +273,10 @@ def messaging_dashboard(request):
     # Get active templates
     templates = MessageTemplate.objects.filter(is_active=True).order_by('-updated_at')[:10]
 
-=======
-@staff_member_required
-def messaging_dashboard(request):
-    """Messaging dashboard"""
-    # Get all messages sent by current user
-    sent_messages = Message.objects.filter(sender=request.user).order_by('-created_at')
-    
-    # Get messages with responses
-    messages_with_responses = sent_messages.filter(responses__isnull=False).distinct()
-    
-    # Get recent responses
-    recent_responses = MessageResponse.objects.filter(
-        message__sender=request.user
-    ).select_related('respondent', 'message').order_by('-created_at')[:10]
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     context = {
         'sent_messages': sent_messages,
         'messages_with_responses': messages_with_responses,
         'recent_responses': recent_responses,
-<<<<<<< HEAD
         'templates': templates,
     }
     return render(request, 'portal/messaging_dashboard.html', context)
@@ -591,20 +483,11 @@ def compose_message(request):
     """Compose and send messages"""
     from messaging.models import MessageTemplate
     
-=======
-    }
-    return render(request, 'portal/messaging_dashboard.html', context)
-
-@staff_member_required
-def compose_message(request):
-    """Compose and send messages"""
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     if request.method == 'POST':
         subject = request.POST.get('subject')
         content = request.POST.get('content')
         message_type = request.POST.get('message_type', 'broadcast')
         recipient_ids = request.POST.getlist('recipients')
-<<<<<<< HEAD
 
         # Filter out empty strings from recipient_ids to prevent ValueError
         recipient_ids = [rid for rid in recipient_ids if rid and rid.strip()]
@@ -625,17 +508,6 @@ def compose_message(request):
         except (ValueError, TypeError):
             recipient_ids = []
 
-=======
-        
-        template_id = request.POST.get('template_id')
-        if template_id:
-            template = MessageTemplate.objects.get(id=template_id)
-            templates = MessageTemplate.objects.filter(is_active=True)
-            return render(request, 'portal/compose_message.html', {
-                'members': members,
-                'templates': templates})
-       
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         # Create message
         message = Message.objects.create(
             sender=request.user,
@@ -645,11 +517,7 @@ def compose_message(request):
             is_sent=True,
             sent_at=timezone.now()
         )
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         # Add recipients
         if message_type != 'broadcast' and recipient_ids:
             recipients = Member.objects.filter(id__in=recipient_ids)
@@ -657,31 +525,20 @@ def compose_message(request):
             message.is_broadcast = False
         else:
             message.is_broadcast = True
-<<<<<<< HEAD
 
         message.save()
 
-=======
-        
-        message.save()
-        
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         # Create conversations for recipients
         if message.is_broadcast:
             recipients = Member.objects.all()
         else:
             recipients = message.recipients.all()
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         for member in recipients:
             Conversation.objects.get_or_create(
                 message=message,
                 member=member
             )
-<<<<<<< HEAD
 
         # Send SMS to recipients
         sms_sent_count = 0
@@ -762,83 +619,38 @@ def message_responses(request, message_id):
         messages.success(request, 'Reply sent successfully!')
         return redirect('message_responses', message_id=message_id)
 
-=======
-        
-        messages.success(request, f'Message sent to {recipients.count()} members!')
-        return redirect('messaging_dashboard')
-    
-    # GET request - show form
-    members = Member.objects.all()
-    return render(request, 'portal/compose_message.html', {'members': members})
-    
-    
-@staff_member_required
-def message_responses(request, message_id):
-    """View responses to a specific message"""
-    message = get_object_or_404(Message, id=message_id, sender=request.user)
-    responses = message.responses.select_related('respondent').all()
-    
-    if request.method == 'POST' and 'reply' in request.POST:
-        response_id = request.POST.get('response_id')
-        reply_content = request.POST.get('reply_content')
-        
-        response = get_object_or_404(MessageResponse, id=response_id)
-        response.admin_reply = reply_content
-        response.replied_at = timezone.now()
-        response.save()
-        
-        messages.success(request, 'Reply sent successfully!')
-        return redirect('message_responses', message_id=message_id)
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     context = {
         'message': message,
         'responses': responses,
     }
     return render(request, 'portal/message_responses.html', context)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 @staff_member_required
 def member_messages(request, member_id):
     """View all messages with a specific member"""
     member = get_object_or_404(Member, id=member_id)
-<<<<<<< HEAD
     conversations = Conversation.objects.filter(
         member=member, message__is_deleted=False).select_related('message')
 
-=======
-    conversations = Conversation.objects.filter(member=member).select_related('message')
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     context = {
         'member': member,
         'conversations': conversations,
     }
     return render(request, 'portal/member_messages.html', context)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 @staff_member_required
 def analytics_dashboard(request):
     """Analytics and reporting dashboard"""
     from django.db.models import Count, Q
     import datetime
     from django.utils import timezone
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     # Member statistics
     total_members = Member.objects.count()
     active_members = Member.objects.filter(status='active').count()
     inactive_members = Member.objects.filter(status='inactive').count()
-<<<<<<< HEAD
     visitor_members = Member.objects.filter(status='visitor').count()
 
     # Gender distribution from the database with stable labels.
@@ -848,12 +660,6 @@ def analytics_dashboard(request):
         'O': Member.objects.filter(gender='O').count(),
     }
 
-=======
-    
-    # Gender distribution
-    gender_stats = Member.objects.values('gender').annotate(count=Count('id'))
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     # Age groups
     today = timezone.now().date()
     age_groups = {
@@ -873,7 +679,6 @@ def analytics_dashboard(request):
             date_of_birth__lte=today - datetime.timedelta(days=36*365)
         ).count(),
     }
-<<<<<<< HEAD
 
     # Attendance charts from the database.
     attendance_by_service = Attendance.objects.filter(is_deleted=False).values('service_type').annotate(
@@ -936,33 +741,16 @@ def analytics_dashboard(request):
         if month_index is not None and 0 <= month_index < 12:
             month_counts[month_index] = row['count']
 
-=======
-    
-    # Message statistics
-    total_messages = Message.objects.filter(sender=request.user).count()
-    broadcast_messages = Message.objects.filter(sender=request.user, is_broadcast=True).count()
-    individual_messages = Message.objects.filter(sender=request.user, is_broadcast=False).count()
-    
-    # Response rates
-    messages_with_responses = Message.objects.filter(sender=request.user, responses__isnull=False).distinct().count()
-    response_rate = (messages_with_responses / total_messages * 100) if total_messages > 0 else 0
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     context = {
         'total_members': total_members,
         'active_members': active_members,
         'inactive_members': inactive_members,
-<<<<<<< HEAD
         'visitor_members': visitor_members,
-=======
-        'gender_stats': gender_stats,
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         'age_groups': age_groups,
         'total_messages': total_messages,
         'broadcast_messages': broadcast_messages,
         'individual_messages': individual_messages,
         'response_rate': round(response_rate, 2),
-<<<<<<< HEAD
         'gender_chart_labels': json.dumps(['Male', 'Female', 'Other']),
         'gender_chart_data': json.dumps([
             gender_counts['M'],
@@ -992,16 +780,10 @@ def analytics_dashboard(request):
     return render(request, 'portal/analytics.html', context)
 
 
-=======
-    }
-    return render(request, 'portal/analytics.html', context)
-
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 @staff_member_required
 def ajax_search_members(request):
     """AJAX endpoint for member search suggestions"""
     query = request.GET.get('q', '')
-<<<<<<< HEAD
     status = request.GET.get('status', '')
     get_all = request.GET.get('all', '')
 
@@ -1022,19 +804,6 @@ def ajax_search_members(request):
     else:
         return JsonResponse({'results': []})
 
-=======
-    
-    if len(query) < 2:
-        return JsonResponse({'results': []})
-    
-    members = Member.objects.filter(
-        Q(first_name__icontains=query) |
-        Q(last_name__icontains=query) |
-        Q(phone_number__icontains=query) |
-        Q(email__icontains=query)
-    )[:10]
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     results = []
     for member in members:
         results.append({
@@ -1044,11 +813,7 @@ def ajax_search_members(request):
             'phone': str(member.phone_number),
             'photo_url': member.photo_url,
         })
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     return JsonResponse({'results': results})
 
 
@@ -1056,7 +821,6 @@ def birthday_tracker(request):
     """View upcoming birthdays"""
     today = date.today()
     next_30_days = today + timedelta(days=30)
-<<<<<<< HEAD
 
     # Get birthdays in next 30 days
     birthdays = Member.objects.filter(
@@ -1080,29 +844,6 @@ def send_birthday_wishes(request, member_id):
     message = f"🎉 Happy Birthday {member.first_name}! 🎂\n"
     message += f"May God bless you abundantly on your special day!"
 
-=======
-    
-    # Get birthdays in next 30 days
-    birthdays = Member.objects.filter(
-        Q(date_of_birth__month=today.month, date_of_birth__day__gte=today.day) |
-        Q(date_of_birth__month=next_30_days.month, date_of_birth__day__lte=next_30_days.day)
-    ).order_by('date_of_birth__month', 'date_of_birth__day')
-    
-    # Calculate days until birthday
-    for member in birthdays:
-        member.days_until_birthday = member.days_until_birthday()
-    
-    return render(request, 'portal/birthdays.html', {'birthdays': birthdays})
-
-def send_birthday_wishes(request, member_id):
-    """Send automated birthday wishes"""
-    member = get_object_or_404(Member, id=member_id)
-    
-    # Create birthday message
-    message = f"🎉 Happy Birthday {member.first_name}! 🎂\n"
-    message += f"May God bless you abundantly on your special day!"
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     # Send message
     Message.objects.create(
         sender=request.user,
@@ -1112,11 +853,7 @@ def send_birthday_wishes(request, member_id):
         is_sent=True,
         sent_at=timezone.now()
     )
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     messages.success(request, f"Birthday wish sent to {member.full_name()}!")
     return redirect('birthday_tracker')
 
@@ -1129,18 +866,11 @@ def export_members_csv(request):
         content_type='text/csv',
         headers={'Content-Disposition': 'attachment; filename="members.csv"'},
     )
-<<<<<<< HEAD
 
     writer = csv.writer(response)
     writer.writerow(['ID', 'First Name', 'Last Name', 'Email',
                     'Phone', 'Status', 'Date Joined', 'Address', 'City'])
 
-=======
-    
-    writer = csv.writer(response)
-    writer.writerow(['ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Status', 'Date Joined', 'Address', 'City'])
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     members = Member.objects.all()
     for member in members:
         writer.writerow([
@@ -1154,16 +884,10 @@ def export_members_csv(request):
             member.address,
             member.city
         ])
-<<<<<<< HEAD
 
     return response
 
 
-=======
-    
-    return response
-
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 @login_required
 def quick_attendance(request):
     """Quick attendance taking interface"""
@@ -1171,16 +895,11 @@ def quick_attendance(request):
         service_type = request.POST.get('service_type')
         service_date = request.POST.get('service_date', date.today())
         member_ids = request.POST.getlist('members')
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         # Convert string date to date object if needed
         if isinstance(service_date, str):
             from datetime import datetime
             service_date = datetime.strptime(service_date, '%Y-%m-%d').date()
-<<<<<<< HEAD
 
         # Normalize member ids to ints
         try:
@@ -1272,29 +991,6 @@ def quick_attendance(request):
     # Get active members
     active_members = Member.objects.filter(status='active')
 
-=======
-        
-        count = 0
-        for member_id in member_ids:
-            try:
-                Attendance.objects.create(
-                    member_id=member_id,
-                    service_date=service_date,
-                    service_type=service_type,
-                    attended=True
-                )
-                count += 1
-            except Exception as e:
-                messages.error(request, f"Error recording attendance for member {member_id}: {str(e)}")
-        
-        messages.success(request, f"Attendance recorded for {count} members!")
-        return redirect('quick_attendance')
-    
-    # GET request - show form
-    # Get active members
-    active_members = Member.objects.filter(status='active')
-    
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     # Predefined service types
     SERVICE_TYPES = [
         ('sunday_service', 'Sunday Service'),
@@ -1303,7 +999,6 @@ def quick_attendance(request):
         ('youth_meeting', 'Youth Meeting'),
         ('special_event', 'Special Event'),
     ]
-<<<<<<< HEAD
 
     # Today's attendance stats (all service types)
     today = date.today()
@@ -1777,43 +1472,11 @@ def setup_sms_email(request):
 
 
 @login_required
-=======
-    
-    return render(request, 'portal/quick_attendance.html', {
-        'members': active_members,
-        'today': date.today(),
-        'service_types': SERVICE_TYPES,
-    })
-    
-    
-    
-@login_required
-def setup_sms_email(request):
-    """Simple SMS and Email setup page"""
-    
-    # This is a temporary placeholder view
-    # We'll implement the full SMS/Email setup later
-    
-    context = {
-        'title': 'SMS & Email Setup',
-        'message': 'SMS and Email setup will be available after migrations.'
-    }
-    
-    return render(request, 'portal/setup_sms_email.html', context)
-
-@login_required  
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 def send_test_message(request):
     """Send test message endpoint"""
     # Placeholder for now
     from django.http import JsonResponse
     return JsonResponse({
-<<<<<<< HEAD
         'success': False,
         'message': 'Feature not available yet. Complete migrations first.'
     })
-=======
-        'success': False, 
-        'message': 'Feature not available yet. Complete migrations first.'
-    })
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986

@@ -37,13 +37,10 @@ class Message(models.Model):
     sms_sent = models.BooleanField(default=False)
     whatsapp_sent = models.BooleanField(default=False)
     
-<<<<<<< HEAD
     # Soft delete
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     class Meta:
         ordering = ['-created_at']
     
@@ -66,13 +63,10 @@ class MessageResponse(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     
-<<<<<<< HEAD
     # Soft delete
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     class Meta:
         ordering = ['-created_at']
         unique_together = ['message', 'respondent']
@@ -129,13 +123,10 @@ class SMSLog(models.Model):
     sent_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     
-<<<<<<< HEAD
     # Soft delete
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     class Meta:
         ordering = ['-created_at']
     
@@ -143,7 +134,6 @@ class SMSLog(models.Model):
         return f"SMS to {self.member}: {self.status}"
 
 
-<<<<<<< HEAD
 class MessageTemplate(models.Model):
     """Reusable message templates for quick message composition"""
     TEMPLATE_TYPE_CHOICES = [
@@ -179,7 +169,5 @@ class MessageTemplate(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_template_type_display()})"
 
-=======
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 
 from .config import SMSConfiguration, EmailConfiguration    

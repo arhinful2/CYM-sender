@@ -29,10 +29,6 @@ urlpatterns = [
     path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', home, name='home'), 
-<<<<<<< HEAD
-=======
-    path('', include('pwa.urls')),
->>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 ]
 
 if settings.DEBUG:
