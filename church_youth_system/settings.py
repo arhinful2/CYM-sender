@@ -97,6 +97,26 @@ DATABASES = {
     }
 }
 
+# Support for DATABASE_URL (Neon / Vercel Postgres / other providers)
+try:
+    import dj_database_url
+except Exception:
+    dj_database_url = None
+
+DATABASE_URL = config('DATABASE_URL', default=None)
+if DATABASE_URL and dj_database_url:
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
+elif config('PGDATABASE', default=''):
+    # Fallback to individual PG* env vars when provided
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': config('PGDATABASE', default=config('POSTGRES_DATABASE', default='church_youth_db')),
+        'USER': config('PGUSER', default=config('POSTGRES_USER', default='youth_admin')),
+        'PASSWORD': config('PGPASSWORD', default=config('POSTGRES_PASSWORD', default='')),
+        'HOST': config('PGHOST', default=config('POSTGRES_HOST', default='')),
+        'PORT': config('PGPORT', default='5432'),
+    }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -127,6 +147,20 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Vercel / production static & media settings
+# Use Whitenoise for static files in production
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Blob / object storage tokens (Vercel Blob or similar)
+# Set these in Vercel dashboard when using Vercel Blob or other provider
+VERCEL_BLOB_TOKEN = config('VERCEL_BLOB_TOKEN', default='')
+BLOB_READ_WRITE_TOKEN = config('BLOB_READ_WRITE_TOKEN', default='')
+
+# If you plan to use S3-compatible storage (django-storages + boto3),
+# add `DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'`
+# and set the relevant AWS_* or S3_ENDPOINT variables in Vercel.
 
 # File upload permissions
 FILE_UPLOAD_PERMISSIONS = 0o644
