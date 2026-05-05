@@ -1,7 +1,11 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
+<<<<<<< HEAD
 from .models import Message, MessageResponse, Conversation, SMSLog, MessageTemplate
+=======
+from .models import Message, MessageResponse, Conversation, SMSLog
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.utils import timezone
@@ -16,6 +20,7 @@ from django.urls import reverse
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
+<<<<<<< HEAD
     list_display = ('subject', 'sender', 'message_type', 'created_at',
                     'is_sent', 'recipients_count', 'responses_count', 'deleted_badge')
     list_filter = ('message_type', 'is_sent', 'is_deleted', 'created_at', 'sender')
@@ -24,6 +29,15 @@ class MessageAdmin(admin.ModelAdmin):
     filter_horizontal = ('recipients',)
     date_hierarchy = 'created_at'
 
+=======
+    list_display = ('subject', 'sender', 'message_type', 'created_at', 'is_sent', 'recipients_count', 'responses_count')
+    list_filter = ('message_type', 'is_sent', 'created_at', 'sender')
+    search_fields = ('subject', 'content', 'sender__username')
+    readonly_fields = ('created_at', 'sent_at', 'responses_count_display')
+    filter_horizontal = ('recipients',)
+    date_hierarchy = 'created_at'
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     fieldsets = (
         ('Message Details', {
             'fields': ('sender', 'subject', 'content', 'message_type')
@@ -39,6 +53,7 @@ class MessageAdmin(admin.ModelAdmin):
         ('Status', {
             'fields': ('is_sent', 'sent_at', 'sms_sent', 'whatsapp_sent', 'responses_count_display'),
         }),
+<<<<<<< HEAD
         ('Soft Delete', {
             'fields': ('is_deleted', 'deleted_at'),
             'classes': ('collapse',),
@@ -59,11 +74,16 @@ class MessageAdmin(admin.ModelAdmin):
         return "-"
     deleted_badge.short_description = 'Status'
 
+=======
+    )
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     def recipients_count(self, obj):
         if obj.is_broadcast:
             return "All Members"
         return obj.recipients.count()
     recipients_count.short_description = 'Recipients'
+<<<<<<< HEAD
 
     def responses_count(self, obj):
         return obj.responses.count()
@@ -80,31 +100,63 @@ class MessageAdmin(admin.ModelAdmin):
         if not obj.pk:
             obj.sender = request.user
 
+=======
+    
+    def responses_count(self, obj):
+        return obj.responses.count()
+    responses_count.short_description = 'Responses'
+    
+    def responses_count_display(self, obj):
+        count = obj.responses.count()
+        url = reverse('admin:messaging_messageresponse_changelist') + f'?message__id__exact={obj.id}'
+        return format_html('<a href="{}">{} Responses</a>', url, count)
+    responses_count_display.short_description = 'Total Responses'
+    
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.sender = request.user
+        
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         # If no recipients selected, it's a broadcast
         if not obj.recipients.exists():
             obj.is_broadcast = True
             obj.message_type = 'broadcast'
+<<<<<<< HEAD
 
         super().save_model(request, obj, form, change)
 
+=======
+        
+        super().save_model(request, obj, form, change)
+        
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         # Mark as sent if scheduled time is past or immediate
         if not obj.scheduled_for or obj.scheduled_for <= timezone.now():
             obj.is_sent = True
             obj.sent_at = timezone.now()
             obj.save()
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
             # Create conversations for recipients
             if obj.is_broadcast:
                 from members.models import Member
                 recipients = Member.objects.all()
             else:
                 recipients = obj.recipients.all()
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
             for member in recipients:
                 Conversation.objects.get_or_create(
                     message=obj,
                     member=member
                 )
+<<<<<<< HEAD
 
     def response_stats(self, obj):
         responses = MessageResponse.objects.filter(message=obj, is_deleted=False)
@@ -122,6 +174,22 @@ class MessageResponseAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'replied_at', 'deleted_at', 'admin_reply_preview')
     autocomplete_fields = ['message', 'respondent']
 
+=======
+    
+    def response_stats(self, obj):
+        responses = MessageResponse.objects.filter(message=obj)
+        return f"{responses.filter(is_acknowledgment=True).count()} acknowledgments, {responses.filter(is_reply=True).count()} replies"
+    response_stats.short_description = 'Response Stats'
+
+@admin.register(MessageResponse)
+class MessageResponseAdmin(admin.ModelAdmin):
+    list_display = ('message', 'respondent', 'created_at', 'has_admin_reply', 'is_acknowledgment', 'is_reply')
+    list_filter = ('is_acknowledgment', 'is_reply', 'created_at', 'replied_at')
+    search_fields = ('response_content', 'respondent__first_name', 'respondent__last_name', 'message__subject')
+    readonly_fields = ('created_at', 'replied_at', 'admin_reply_preview')
+    autocomplete_fields = ['message', 'respondent']
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     fieldsets = (
         ('Response Details', {
             'fields': ('message', 'respondent', 'response_content', 'is_acknowledgment', 'is_reply')
@@ -129,6 +197,7 @@ class MessageResponseAdmin(admin.ModelAdmin):
         ('Admin Reply', {
             'fields': ('admin_reply', 'admin_reply_preview', 'replied_at')
         }),
+<<<<<<< HEAD
         ('Soft Delete', {
             'fields': ('is_deleted', 'deleted_at'),
             'classes': ('collapse',),
@@ -149,21 +218,34 @@ class MessageResponseAdmin(admin.ModelAdmin):
         return "-"
     deleted_badge.short_description = 'Status'
 
+=======
+    )
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     def has_admin_reply(self, obj):
         return bool(obj.admin_reply)
     has_admin_reply.boolean = True
     has_admin_reply.short_description = 'Replied'
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     def admin_reply_preview(self, obj):
         if obj.admin_reply:
             return format_html('<div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">{}</div>', obj.admin_reply)
         return "No reply yet"
     admin_reply_preview.short_description = 'Reply Preview'
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     def save_model(self, request, obj, form, change):
         # If admin reply is added/updated, update replied_at
         if 'admin_reply' in form.changed_data and obj.admin_reply:
             obj.replied_at = timezone.now()
+<<<<<<< HEAD
 
         # Update conversation status
         conversation = Conversation.objects.filter(
@@ -209,23 +291,58 @@ class SMSLogAdmin(admin.ModelAdmin):
         return "-"
     deleted_badge.short_description = 'Status'
 
+=======
+        
+        # Update conversation status
+        conversation = Conversation.objects.filter(message=obj.message, member=obj.respondent).first()
+        if conversation:
+            conversation.responded = True
+            conversation.save()
+        
+        super().save_model(request, obj, form, change)
+
+@admin.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = ('message', 'member', 'is_read', 'responded', 'last_updated')
+    list_filter = ('is_read', 'responded', 'last_updated')
+    search_fields = ('member__first_name', 'member__last_name', 'message__subject')
+    readonly_fields = ('last_updated',)
+    autocomplete_fields = ['message', 'member']
+
+@admin.register(SMSLog)
+class SMSLogAdmin(admin.ModelAdmin):
+    list_display = ('member', 'phone_number', 'status', 'is_incoming', 'created_at', 'content_preview')
+    list_filter = ('status', 'is_incoming', 'created_at')
+    search_fields = ('member__first_name', 'member__last_name', 'phone_number', 'content')
+    readonly_fields = ('created_at', 'sent_at', 'delivered_at')
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     def content_preview(self, obj):
         if len(obj.content) > 50:
             return f"{obj.content[:50]}..."
         return obj.content
     content_preview.short_description = 'Content'
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 
 @admin.register(SMSConfiguration)
 class SMSConfigurationAdmin(admin.ModelAdmin):
     list_display = ('provider', 'is_active', 'created_at')
     list_editable = ('is_active',)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     fieldsets = (
         ('Provider Selection', {
             'fields': ('provider', 'is_active', 'default_sender_name', 'cost_per_sms')
         }),
         ('Twilio Settings (if using Twilio)', {
+<<<<<<< HEAD
             'fields': ('twilio_account_sid', 'twilio_auth_token', 'twilio_phone_number', 'twilio_api_url'),
             'classes': ('collapse',),
         }),
@@ -244,17 +361,39 @@ class SMSConfigurationAdmin(admin.ModelAdmin):
         """Only allow one configuration"""
         return SMSConfiguration.objects.count() == 0
 
+=======
+            'fields': ('twilio_account_sid', 'twilio_auth_token', 'twilio_phone_number'),
+            'classes': ('collapse',),
+        }),
+        ('Africa\'s Talking Settings (if using Africa\'s Talking)', {
+            'fields': ('africastalking_username', 'africastalking_api_key', 'africastalking_sender_id'),
+            'classes': ('collapse',),
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        """Only allow one configuration"""
+        return SMSConfiguration.objects.count() == 0
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     def has_delete_permission(self, request, obj=None):
         """Prevent deletion of configuration"""
         return False
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 @admin.register(EmailConfiguration)
 class EmailConfigurationAdmin(admin.ModelAdmin):
     list_display = ('provider', 'from_email', 'is_active', 'test_button')
     list_editable = ('is_active',)
     readonly_fields = ('test_button',)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     fieldsets = (
         ('Provider Selection', {
             'fields': ('provider', 'is_active', 'from_email', 'from_name', 'test_email')
@@ -270,12 +409,17 @@ class EmailConfigurationAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     def test_button(self, obj):
         return format_html(
             '<a class="button" href="test-email/">Test Email Configuration</a>'
         )
     test_button.short_description = 'Test'
+<<<<<<< HEAD
 
     def get_urls(self):
         urls = super().get_urls()
@@ -301,10 +445,35 @@ class EmailConfigurationAdmin(admin.ModelAdmin):
                 if config.use_ssl:
                     server = smtplib.SMTP_SSL(
                         config.smtp_host, config.smtp_port)
+=======
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('test-email/', self.admin_site.admin_view(self.test_email_view), name='test_email'),
+        ]
+        return custom_urls + urls
+    
+    def test_email_view(self, request):
+        """Test email configuration"""
+        config = EmailConfiguration.objects.first()
+        
+        if request.method == 'POST':
+            try:
+                # Test sending email
+                msg = MIMEText('This is a test email from your Church Management System.')
+                msg['Subject'] = 'Test Email from Church System'
+                msg['From'] = f"{config.from_name} <{config.from_email}>"
+                msg['To'] = config.test_email
+                
+                if config.use_ssl:
+                    server = smtplib.SMTP_SSL(config.smtp_host, config.smtp_port)
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                 else:
                     server = smtplib.SMTP(config.smtp_host, config.smtp_port)
                     if config.use_tls:
                         server.starttls()
+<<<<<<< HEAD
 
                 if config.smtp_username and config.smtp_password:
                     server.login(config.smtp_username, config.smtp_password)
@@ -319,11 +488,27 @@ class EmailConfigurationAdmin(admin.ModelAdmin):
 
             return redirect('admin:messaging_emailconfiguration_changelist')
 
+=======
+                
+                if config.smtp_username and config.smtp_password:
+                    server.login(config.smtp_username, config.smtp_password)
+                
+                server.send_message(msg)
+                server.quit()
+                
+                messages.success(request, f'Test email sent successfully to {config.test_email}!')
+            except Exception as e:
+                messages.error(request, f'Failed to send test email: {str(e)}')
+            
+            return redirect('admin:messaging_emailconfiguration_changelist')
+        
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         context = {
             'config': config,
             'title': 'Test Email Configuration',
         }
         return render(request, 'admin/test_email.html', context)
+<<<<<<< HEAD
 
     def has_add_permission(self, request):
         """Only allow one configuration"""
@@ -387,3 +572,13 @@ class MessageTemplateAdmin(admin.ModelAdmin):
             'all': ('admin/css/template_admin.css',)
         }
 
+=======
+    
+    def has_add_permission(self, request):
+        """Only allow one configuration"""
+        return EmailConfiguration.objects.count() == 0
+    
+    def has_delete_permission(self, request, obj=None):
+        """Prevent deletion of configuration"""
+        return False    
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986

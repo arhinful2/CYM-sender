@@ -32,9 +32,12 @@
         <i class="fas fa-clipboard-check me-2"></i>Quick Attendance
     </h1>
     <div class="btn-toolbar mb-2 mb-md-0">
+<<<<<<< HEAD
         <a href="{% url 'attendance_history' %}" class="btn btn-outline-primary me-2">
             <i class="fas fa-history me-1"></i> Attendance History
         </a>
+=======
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
         <a href="{% url 'admin_portal' %}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
         </a>
@@ -159,7 +162,11 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body text-center">
+<<<<<<< HEAD
                 <h3>{{ today_attendance_count }}</h3>
+=======
+                <h3>0</h3>
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                 <p class="text-muted mb-0">Today's Attendance</p>
             </div>
         </div>
@@ -167,12 +174,17 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body text-center">
+<<<<<<< HEAD
                 <h3>{{ attendance_rate }}%</h3>
+=======
+                <h3>0%</h3>
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
                 <p class="text-muted mb-0">Attendance Rate</p>
             </div>
         </div>
     </div>
 </div>
+<<<<<<< HEAD
 
 <div class="row mt-4">
     <div class="col-12">
@@ -228,10 +240,13 @@
         </div>
     </div>
 </div>
+=======
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
 {% endblock %}
 
 {% block extra_js %}
 <script>
+<<<<<<< HEAD
     const noticeModalElement = document.getElementById('attendanceNoticeModal');
     const noticeModal = new bootstrap.Modal(noticeModalElement);
     const noticeTitle = document.getElementById('attendanceNoticeTitle');
@@ -278,6 +293,8 @@
         });
     }
 
+=======
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     // Update selected count
     function updateSelectedCount() {
         const checkboxes = document.querySelectorAll('input[name="members"]:checked');
@@ -325,6 +342,7 @@
     // Initialize count
     updateSelectedCount();
     
+<<<<<<< HEAD
     // Form submission with duplicate pre-check
     document.getElementById('attendance-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -446,6 +464,25 @@
             });
             console.error(err);
         });
+=======
+    // Form submission
+    document.getElementById('attendance-form').addEventListener('submit', function(e) {
+        const checkboxes = document.querySelectorAll('input[name="members"]:checked');
+        if (checkboxes.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one member.');
+            return false;
+        }
+        
+        if (!document.getElementById('service_type').value) {
+            e.preventDefault();
+            alert('Please select a service type.');
+            return false;
+        }
+        
+        // Show confirmation
+        return confirm(`Record attendance for ${checkboxes.length} members?`);
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     });
     
     // Quick search functionality

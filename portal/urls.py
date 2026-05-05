@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.admin_portal, name='admin_portal'),
     path('search/', views.member_search, name='member_search'),
+<<<<<<< HEAD
     path('member/add/', views.add_member, name='add_member'),
     path('member/<int:pk>/', views.member_detail, name='member_detail'),
     path('member/<int:pk>/edit/', views.edit_member, name='edit_member'),
@@ -19,11 +20,18 @@ urlpatterns = [
     path('messaging/bulk-delete/', views.bulk_delete_messages, name='bulk_delete_messages'),
     path('messaging/bulk-delete-responses/', views.bulk_delete_responses, name='bulk_delete_responses'),
     path('messaging/trash/', views.trash_view, name='trash_view'),
+=======
+    path('member/<int:pk>/', views.member_detail, name='member_detail'),
+    path('messaging/', views.messaging_dashboard, name='messaging_dashboard'),
+    path('messaging/compose/', views.compose_message, name='compose_message'),
+    path('messaging/<uuid:message_id>/responses/', views.message_responses, name='message_responses'),
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     path('member/<int:member_id>/messages/', views.member_messages, name='member_messages'),
     path('analytics/', views.analytics_dashboard, name='analytics_dashboard'),
     path('ajax/search-members/', views.ajax_search_members, name='ajax_search_members'),
     path('export-members-csv/', views.export_members_csv, name='export_members_csv'),
     path('quick-attendance/', views.quick_attendance, name='quick_attendance'),
+<<<<<<< HEAD
     path('ajax/check-attendance/', views.check_attendance, name='check_attendance'),
     path('attendance/history/', views.attendance_history, name='attendance_history'),
     path('attendance/<int:attendance_id>/delete/', views.delete_attendance, name='delete_attendance'),
@@ -31,6 +39,8 @@ urlpatterns = [
     path('attendance/<int:attendance_id>/permanently-delete/', views.permanently_delete_attendance, name='permanently_delete_attendance'),
     path('attendance/<int:attendance_id>/edit/', views.edit_attendance, name='edit_attendance'),
     path('attendance/report/', views.attendance_report, name='attendance_report'),
+=======
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     path('setup-sms-email/', views.setup_sms_email, name='setup_sms_email'),
     path('send-test-message/', views.send_test_message, name='send_test_message'),
     

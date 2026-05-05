@@ -24,6 +24,7 @@ class Member(models.Model):
         ('transferred', 'Transferred'),
     ]
     
+<<<<<<< HEAD
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     middle_name = models.CharField(max_length=100, blank=True)
@@ -45,6 +46,29 @@ class Member(models.Model):
     date_joined = models.DateField(default=date.today, blank=True, null=True)
     baptism_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', blank=True)
+=======
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, blank=True)
+    
+    # Personal Information
+    date_of_birth = models.DateField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    email = models.EmailField(unique=True)
+    phone_number = PhoneNumberField(unique=True)
+    alternate_phone = PhoneNumberField(blank=True)
+    
+    # Address
+    address = models.TextField()
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+    
+    # Church Information
+    date_joined = models.DateField(default=date.today)
+    baptism_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     department = models.CharField(max_length=100, blank=True)
     spiritual_gifts = models.TextField(blank=True)
     
@@ -52,9 +76,15 @@ class Member(models.Model):
     photo = models.ImageField(upload_to=member_photo_path, blank=True, null=True)
     
     # Emergency Contact
+<<<<<<< HEAD
     emergency_contact_name = models.CharField(max_length=200, blank=True)
     emergency_contact_phone = PhoneNumberField(blank=True)
     emergency_contact_relationship = models.CharField(max_length=100, blank=True)
+=======
+    emergency_contact_name = models.CharField(max_length=200)
+    emergency_contact_phone = PhoneNumberField()
+    emergency_contact_relationship = models.CharField(max_length=100)
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     
     # Additional Information
     occupation = models.CharField(max_length=100, blank=True)
@@ -66,7 +96,10 @@ class Member(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='members_created')
+<<<<<<< HEAD
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='members_updated')
+=======
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     
     class Meta:
         ordering = ['last_name', 'first_name']
@@ -209,8 +242,11 @@ class Attendance(models.Model):
     attended = models.BooleanField(default=True)
     check_in_time = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True)
+<<<<<<< HEAD
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
+=======
+>>>>>>> 3fbaf2d992c87deb75b608a23df462882d9c6986
     
     class Meta:
         ordering = ['-service_date']
