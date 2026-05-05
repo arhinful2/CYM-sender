@@ -14,7 +14,8 @@ class VercelBlobStorage(Storage):
     """Django storage backend backed by Vercel Blob."""
 
     def __init__(self):
-        self.token = config("BLOB_READ_WRITE_TOKEN", default="") or config("VERCEL_BLOB_TOKEN", default="")
+        self.token = config("BLOB_READ_WRITE_TOKEN", default="") or config(
+            "VERCEL_BLOB_TOKEN", default="")
         self.base_url = config("VERCEL_BLOB_BASE_URL", default="").rstrip("/")
 
     def _normalize_name(self, name: str) -> str:
@@ -33,7 +34,8 @@ class VercelBlobStorage(Storage):
 
     def _save(self, name, content):
         if not self.token:
-            raise ValueError("BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN is required for Vercel Blob storage.")
+            raise ValueError(
+                "BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN is required for Vercel Blob storage.")
 
         normalized_name = self._normalize_name(name)
         blob = put(
@@ -79,4 +81,5 @@ class VercelBlobStorage(Storage):
         return ContentFile(response.content, name=name)
 
     def path(self, name):
-        raise NotImplementedError("Vercel Blob storage does not support local file paths.")
+        raise NotImplementedError(
+            "Vercel Blob storage does not support local file paths.")

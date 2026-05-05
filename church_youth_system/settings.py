@@ -14,9 +14,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 Django settings for church_youth_system project.
 """
 
+import os
 from pathlib import Path
 from decouple import config
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -179,7 +179,8 @@ if not DEBUG:
 VERCEL_BLOB_TOKEN = config('VERCEL_BLOB_TOKEN', default='')
 BLOB_READ_WRITE_TOKEN = config('BLOB_READ_WRITE_TOKEN', default='')
 VERCEL_BLOB_BASE_URL = config('VERCEL_BLOB_BASE_URL', default='')
-USE_VERCEL_BLOB_STORAGE = config('USE_VERCEL_BLOB_STORAGE', default=False, cast=bool)
+USE_VERCEL_BLOB_STORAGE = config(
+    'USE_VERCEL_BLOB_STORAGE', default=False, cast=bool)
 
 blob_token = BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN
 

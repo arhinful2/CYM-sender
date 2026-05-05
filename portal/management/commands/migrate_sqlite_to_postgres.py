@@ -21,7 +21,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--exclude',
             action='append',
-            default=['contenttypes', 'auth.permission', 'sessions', 'admin.logentry'],
+            default=['contenttypes', 'auth.permission',
+                     'sessions', 'admin.logentry'],
             help='Model labels to exclude from the transfer. Can be used multiple times.',
         )
 
@@ -31,22 +32,26 @@ class Command(BaseCommand):
         excludes = options['exclude'] or []
 
         if source_db not in settings.DATABASES:
-            self.stderr.write(self.style.ERROR(f'Source database alias "{source_db}" is not configured.'))
+            self.stderr.write(self.style.ERROR(
+                f'Source database alias "{source_db}" is not configured.'))
             return
 
         if target_db not in settings.DATABASES:
-            self.stderr.write(self.style.ERROR(f'Target database alias "{target_db}" is not configured.'))
+            self.stderr.write(self.style.ERROR(
+                f'Target database alias "{target_db}" is not configured.'))
             return
 
         source_engine = settings.DATABASES[source_db]['ENGINE']
         target_engine = settings.DATABASES[target_db]['ENGINE']
 
         if 'sqlite' not in source_engine:
-            self.stderr.write(self.style.ERROR(f'Source database "{source_db}" must be SQLite. Current engine: {source_engine}'))
+            self.stderr.write(self.style.ERROR(
+                f'Source database "{source_db}" must be SQLite. Current engine: {source_engine}'))
             return
 
         if 'sqlite' in target_engine:
-            self.stderr.write(self.style.ERROR('Target database must be PostgreSQL-like, not SQLite.'))
+            self.stderr.write(self.style.ERROR(
+                'Target database must be PostgreSQL-like, not SQLite.'))
             return
 
         self.stdout.write(f'Exporting data from {source_db}...')
@@ -65,8 +70,10 @@ class Command(BaseCommand):
         try:
             self.stdout.write(f'Loading exported data into {target_db}...')
             call_command('loaddata', temp_path, database=target_db)
-            self.stdout.write(self.style.SUCCESS('SQLite data copied into PostgreSQL successfully.'))
+            self.stdout.write(self.style.SUCCESS(
+                'SQLite data copied into PostgreSQL successfully.'))
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
-                self.stdout.write(f'Removed temporary export file: {temp_path}')
+                self.stdout.write(
+                    f'Removed temporary export file: {temp_path}')

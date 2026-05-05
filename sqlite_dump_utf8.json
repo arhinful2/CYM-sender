@@ -1,0 +1,139 @@
+﻿[
+{
+  "model": "auth.group",
+  "fields": {
+    "name": "volunteer",
+    "permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$dLbIqXOakl7xJoiUNaWstc$5gl+bCg3yxmoJdppZNJ2OmYTHUg40l6xkC/CUjk6XBs=",
+    "last_login": "2025-12-30T20:47:33.284Z",
+    "is_superuser": true,
+    "username": "youth",
+    "first_name": "",
+    "last_name": "",
+    "email": "youth@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-12-30T11:53:19.091Z",
+    "groups": [
+      [
+        "volunteer"
+      ]
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "members.member",
+  "pk": 1,
+  "fields": {
+    "first_name": "Augustine",
+    "last_name": "Arhinful",
+    "middle_name": "",
+    "date_of_birth": "2004-12-31",
+    "gender": "M",
+    "email": "onlinjob68@gmail.com",
+    "phone_number": "+233501102988",
+    "alternate_phone": "+233545037986",
+    "address": "Kenyasi,Kumasi",
+    "city": "Kumasi",
+    "state": "Ashanti Region",
+    "postal_code": "90014",
+    "date_joined": "2025-12-30",
+    "baptism_date": "2025-12-01",
+    "status": "active",
+    "department": "Media and Gallery Department",
+    "spiritual_gifts": "Musician and Keyboardist",
+    "photo": "member_photos/profile_1.jpg",
+    "emergency_contact_name": "Augustine Arhinful",
+    "emergency_contact_phone": "+233501102988",
+    "emergency_contact_relationship": "0240835802",
+    "occupation": "",
+    "school": "",
+    "talents": "",
+    "notes": "",
+    "created_at": "2025-12-30T15:31:53.281Z",
+    "updated_at": "2025-12-30T20:56:39.738Z",
+    "created_by": [
+      "youth"
+    ],
+    "updated_by": null
+  }
+},
+{
+  "model": "members.attendance",
+  "pk": 1,
+  "fields": {
+    "member": 1,
+    "service_date": "2025-12-30",
+    "service_type": "bible_study",
+    "attended": true,
+    "check_in_time": "2025-12-30T15:36:25.875Z",
+    "notes": "",
+    "is_deleted": false,
+    "deleted_at": null
+  }
+},
+{
+  "model": "members.attendance",
+  "pk": 2,
+  "fields": {
+    "member": 1,
+    "service_date": "2025-12-31",
+    "service_type": "youth_meeting",
+    "attended": true,
+    "check_in_time": "2025-12-31T10:06:49.318Z",
+    "notes": "",
+    "is_deleted": false,
+    "deleted_at": null
+  }
+},
+{
+  "model": "messaging.message",
+  "pk": "f7a2f571-6aeb-48e1-b123-4e2fd788f4ce",
+  "fields": {
+    "sender": [
+      "youth"
+    ],
+    "message_type": "individual",
+    "subject": "fgfhjk",
+    "content": "cgvhbjnmkn bhjnbmnkln knoknjkm",
+    "is_broadcast": false,
+    "is_sent": true,
+    "is_delivered": false,
+    "created_at": "2025-12-31T10:09:08.963Z",
+    "scheduled_for": null,
+    "sent_at": "2025-12-31T10:09:08.961Z",
+    "sms_sent": false,
+    "whatsapp_sent": false,
+    "is_deleted": false,
+    "deleted_at": null,
+    "recipients": []
+  }
+},
+{
+  "model": "accounts.userprofile",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "youth"
+    ],
+    "role": "volunteer",
+    "phone_number": "",
+    "profile_picture": "",
+    "bio": "",
+    "can_view_members": true,
+    "can_edit_members": false,
+    "can_delete_members": false,
+    "can_send_messages": false,
+    "can_view_reports": false,
+    "can_manage_events": false,
+    "created_at": "2025-12-30T14:26:41.131Z",
+    "updated_at": "2025-12-30T14:26:41.132Z"
+  }
+}
+]
