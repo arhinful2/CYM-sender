@@ -1,7 +1,9 @@
-import os, django, json
-os.environ.setdefault('DJANGO_SETTINGS_MODULE','church_youth_system.settings')
-django.setup()
 from django.apps import apps
+import os
+import django
+import json
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'church_youth_system.settings')
+django.setup()
 
 # Load counts comparison to find mismatched models
 counts_path = 'counts_comparison_utf8.json'
@@ -16,7 +18,7 @@ if os.path.exists(counts_path):
                 mismatch_models.append((app_label, m['model']))
 
 # Ensure critical models included
-critical = [('members','member'), ('messaging','message')]
+critical = [('members', 'member'), ('messaging', 'message')]
 for c in critical:
     if c not in mismatch_models:
         mismatch_models.append(c)
@@ -25,7 +27,8 @@ out = {}
 
 for app_label, model_name in mismatch_models:
     key = f"{app_label}.{model_name}"
-    out[key] = {'missing_in_default': [], 'missing_in_sqlite': [], 'field_diffs': []}
+    out[key] = {'missing_in_default': [],
+                'missing_in_sqlite': [], 'field_diffs': []}
     try:
         Model = apps.get_model(app_label, model_name)
     except LookupError as e:
@@ -33,8 +36,10 @@ for app_label, model_name in mismatch_models:
         continue
 
     # get PK lists
-    sqlite_pks = list(Model.objects.using('sqlite').values_list('pk', flat=True))
-    default_pks = list(Model.objects.using('default').values_list('pk', flat=True))
+    sqlite_pks = list(Model.objects.using(
+        'sqlite').values_list('pk', flat=True))
+    default_pks = list(Model.objects.using(
+        'default').values_list('pk', flat=True))
 
     sqlite_set = set(sqlite_pks)
     default_set = set(default_pks)
