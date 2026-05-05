@@ -73,12 +73,12 @@
     {
       "model": "conversation",
       "sqlite": 2,
-      "default": 0
+      "default": 2
     },
     {
       "model": "smslog",
       "sqlite": 2,
-      "default": 0
+      "default": 2
     },
     {
       "model": "messagetemplate",

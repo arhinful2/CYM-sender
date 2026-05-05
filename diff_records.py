@@ -2,6 +2,9 @@ from django.apps import apps
 import os
 import django
 import json
+import datetime
+import decimal
+import uuid
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'church_youth_system.settings')
 django.setup()
 
@@ -9,7 +12,9 @@ django.setup()
 counts_path = 'counts_comparison_utf8.json'
 mismatch_models = []
 if os.path.exists(counts_path):
-    counts = json.load(open(counts_path, 'r', encoding='utf-8'))
+    # Use utf-8-sig to tolerate BOM if present
+    with open(counts_path, 'r', encoding='utf-8-sig') as fh:
+        counts = json.load(fh)
     for app_label, models in counts.items():
         for m in models:
             sqlite_count = m.get('sqlite')
@@ -24,6 +29,21 @@ for c in critical:
         mismatch_models.append(c)
 
 out = {}
+
+def _normalize(v):
+    if isinstance(v, (bytes, bytearray)):
+        try:
+            return v.decode('utf-8', errors='replace')
+        except Exception:
+            return repr(v)
+    if isinstance(v, (datetime.datetime, datetime.date, datetime.time)):
+        return v.isoformat()
+    if isinstance(v, decimal.Decimal):
+        return float(v)
+    if isinstance(v, uuid.UUID):
+        return str(v)
+    return v
+
 
 for app_label, model_name in mismatch_models:
     key = f"{app_label}.{model_name}"
@@ -57,25 +77,22 @@ for app_label, model_name in mismatch_models:
         if s_obj is None or d_obj is None:
             continue
         for field in sorted(set(list(s_obj.keys()) + list(d_obj.keys()))):
-            s_val = s_obj.get(field)
-            d_val = d_obj.get(field)
-            # Normalize bytes to str, Django returns bytes for binary fields sometimes
-            if isinstance(s_val, (bytes, bytearray)):
-                try:
-                    s_val = s_val.decode('utf-8', errors='replace')
-                except:
-                    s_val = repr(s_val)
-            if isinstance(d_val, (bytes, bytearray)):
-                try:
-                    d_val = d_val.decode('utf-8', errors='replace')
-                except:
-                    d_val = repr(d_val)
+            s_val = _normalize(s_obj.get(field))
+            d_val = _normalize(d_obj.get(field))
             if s_val != d_val:
                 diffs[field] = {'sqlite': s_val, 'default': d_val}
         if diffs:
             out[key]['field_diffs'].append({'pk': pk, 'diffs': diffs})
 
 # Save report
+# Normalize PKs and any remaining values to JSON-serializable types
+for key, val in out.items():
+    val['missing_in_default'] = [_normalize(x) for x in val.get('missing_in_default', [])]
+    val['missing_in_sqlite'] = [_normalize(x) for x in val.get('missing_in_sqlite', [])]
+    for item in val.get('field_diffs', []):
+        item['pk'] = _normalize(item.get('pk'))
+        # diffs already normalized
+
 with open('diffs_report.json', 'w', encoding='utf-8') as f:
     json.dump(out, f, indent=2, ensure_ascii=False)
 print('Wrote diffs_report.json')
