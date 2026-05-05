@@ -112,6 +112,11 @@ DATABASES = {
     }
 }
 
+DATABASES['sqlite'] = {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': BASE_DIR / 'db.sqlite3',
+}
+
 # Support for DATABASE_URL (Neon / Vercel Postgres / other providers)
 try:
     import dj_database_url
