@@ -7,6 +7,7 @@ from .models import Member, Family, Attendance
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.templatetags.static import static
 
 class MemberResource(resources.ModelResource):
     class Meta:
@@ -78,7 +79,7 @@ class MemberAdmin(ImportExportModelAdmin):
     def photo_thumbnail(self, obj):
         if obj.photo:
             return format_html('<img src="{}" width="50" height="50" style="border-radius: 50%;" />', obj.photo.url)
-        return format_html('<img src="/static/images/default_profile.png" width="50" height="50" style="border-radius: 50%;" />')
+        return format_html('<img src="{}" width="50" height="50" style="border-radius: 50%;" />', static('images/default_profile.svg'))
     photo_thumbnail.short_description = 'Photo'
     
     def photo_preview(self, obj):

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Dashboard - Youth Church Management{% endblock %}
 
@@ -72,7 +73,7 @@
                                     {% if member.photo %}
                                     <img src="{{ member.photo.url }}" class="profile-img-sm">
                                     {% else %}
-                                    <img src="/static/images/default_profile.png" class="profile-img-sm">
+                                    <img src="{% static 'images/default_profile.svg' %}" class="profile-img-sm">
                                     {% endif %}
                                 </td>
                                 <td>{{ member.full_name }}</td>

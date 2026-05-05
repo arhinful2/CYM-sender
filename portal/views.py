@@ -30,10 +30,13 @@ from django.utils import timezone as django_timezone
 
 def home(request):
     """Homepage - redirects to portal if logged in, otherwise to login"""
-    if request.user.is_authenticated:
-        return redirect('admin_portal')
-    else:
+    if not request.user.is_authenticated:
         return redirect('login')
+
+    if request.user.is_staff or request.user.is_superuser:
+        return redirect('admin_portal')
+
+    return render(request, 'portal/access_denied.html')
 
 
 def staff_required(view_func):
