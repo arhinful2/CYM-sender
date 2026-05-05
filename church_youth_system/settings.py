@@ -14,9 +14,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 Django settings for church_youth_system project.
 """
 
-import os
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1','yourdomain.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -37,19 +37,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party apps
     'crispy_forms',
     'crispy_bootstrap5',
     'import_export',
     'phonenumber_field',
     'simple_history',
-    
+
     # Local apps
     'members.apps.MembersConfig',
     'messaging.apps.MessagingConfig',
     'portal.apps.PortalConfig',
-   
+
     'accounts',
     'events',
     'prayer',
@@ -105,7 +105,8 @@ except Exception:
 
 DATABASE_URL = config('DATABASE_URL', default=None)
 if DATABASE_URL and dj_database_url:
-    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
+    DATABASES['default'] = dj_database_url.parse(
+        DATABASE_URL, conn_max_age=600, ssl_require=True)
 elif config('PGDATABASE', default=''):
     # Fallback to individual PG* env vars when provided
     DATABASES['default'] = {
@@ -183,8 +184,6 @@ PHONENUMBER_DB_FORMAT = 'INTERNATIONAL'
 PHONENUMBER_DEFAULT_REGION = 'GH'  # Change to your country code
 
 
-
-
 # Email settings (for password reset)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
@@ -201,8 +200,8 @@ EMAIL_PORT = config('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@yourchurch.com')
-
+DEFAULT_FROM_EMAIL = config(
+    'DEFAULT_FROM_EMAIL', default='noreply@yourchurch.com')
 
 
 if not DEBUG:
@@ -215,4 +214,3 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
