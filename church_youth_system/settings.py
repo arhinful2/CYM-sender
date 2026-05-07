@@ -166,6 +166,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+if IS_VERCEL:
+    # Vercel build output may not contain a populated STATIC_ROOT directory.
+    # Use finder-based serving to keep Django admin/static assets available.
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_AUTOREFRESH = True
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -201,7 +207,7 @@ STORAGES = {
     },
     'staticfiles': {
         'BACKEND': (
-            'whitenoise.storage.CompressedStaticFilesStorage'
+            'django.contrib.staticfiles.storage.StaticFilesStorage'
             if (not DEBUG and IS_VERCEL) else
             'whitenoise.storage.CompressedManifestStaticFilesStorage'
             if not DEBUG else

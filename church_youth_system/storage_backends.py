@@ -28,8 +28,8 @@ class VercelBlobStorage(Storage):
         if normalized.startswith("http://") or normalized.startswith("https://"):
             return normalized
         if not self.base_url:
-            # Fallback if URL base is not configured.
-            return f"/{normalized}"
+            # Fallback to MEDIA-style URL when explicit blob base URL is not configured.
+            return f"/media/{normalized}"
         return f"{self.base_url}/{quote(normalized)}"
 
     def _save(self, name, content):
@@ -47,7 +47,8 @@ class VercelBlobStorage(Storage):
                 "addRandomSuffix": False,
             },
         )
-        return blob.get("pathname", normalized_name)
+        # Persist full public URL when available so rendering does not depend on extra env configuration.
+        return blob.get("url") or blob.get("pathname", normalized_name)
 
     def delete(self, name):
         if not name or not self.token:
