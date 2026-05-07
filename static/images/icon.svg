@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Church Youth Management System">
+  <rect width="512" height="512" rx="112" fill="#0d6efd"/>
+  <circle cx="256" cy="170" r="58" fill="#ffffff" opacity="0.95"/>
+  <path d="M256 250c-74 0-134 50-134 112v34h268v-34c0-62-60-112-134-112Z" fill="#ffffff" opacity="0.95"/>
+  <rect x="236" y="106" width="40" height="128" rx="12" fill="#ffffff"/>
+  <rect x="202" y="140" width="108" height="40" rx="12" fill="#ffffff"/>
+</svg>

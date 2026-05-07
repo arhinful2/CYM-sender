@@ -1,0 +1,20 @@
+{
+  "name": "Church Youth Management System",
+  "short_name": "Youth Church",
+  "description": "A comprehensive system for managing youth members, events, attendance, and messaging",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/static/images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

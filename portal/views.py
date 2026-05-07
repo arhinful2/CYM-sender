@@ -606,6 +606,95 @@ def compose_message(request):
 
 
 @staff_member_required
+def quick_announcement(request):
+    """Quick broadcast announcement to all members"""
+    if request.method == 'POST':
+        title = request.POST.get('title', 'Announcement')
+        content = request.POST.get('content', '').strip()
+        
+        # Validate content is not empty
+        if not content:
+            messages.error(request, 'Announcement content cannot be empty.')
+            return redirect('admin_portal')
+        
+        try:
+            # Create message as broadcast
+            message = Message.objects.create(
+                sender=request.user,
+                subject=title,
+                content=content,
+                message_type='broadcast',
+                is_broadcast=True,
+                is_sent=True,
+                sent_at=timezone.now()
+            )
+            
+            # Get all active members
+            recipients = Member.objects.filter(status='active')
+            
+            # Create conversations for all members
+            for member in recipients:
+                Conversation.objects.get_or_create(
+                    message=message,
+                    member=member
+                )
+            
+            # Send SMS to all members with phone numbers
+            sms_sent_count = 0
+            sms_failed_count = 0
+            
+            for member in recipients:
+                if member.phone_number:
+                    phone = str(member.phone_number)
+                    sms_result = MessageService.send_sms(
+                        phone,
+                        f"{title}\n\n{content}"
+                    )
+                    
+                    # Create SMS Log
+                    sms_log = SMSLog.objects.create(
+                        message=message,
+                        member=member,
+                        phone_number=phone,
+                        content=content,
+                        status='pending'
+                    )
+                    
+                    if sms_result.get('success'):
+                        sms_log.status = 'sent'
+                        sms_log.provider_message_id = sms_result.get('message_id', '')
+                        sms_log.sent_at = timezone.now()
+                        sms_sent_count += 1
+                    else:
+                        sms_log.status = 'failed'
+                        sms_log.error_message = sms_result.get('error', 'Unknown error')
+                        sms_failed_count += 1
+                    
+                    sms_log.save()
+            
+            # Update message SMS status
+            if sms_sent_count > 0:
+                message.sms_sent = True
+                message.save()
+            
+            # Build success message
+            success_msg = f'Announcement sent to {recipients.count()} members!'
+            if sms_sent_count > 0:
+                success_msg += f' SMS delivered to {sms_sent_count} members.'
+            if sms_failed_count > 0:
+                success_msg += f' {sms_failed_count} SMS failed.'
+            
+            messages.success(request, success_msg)
+            
+        except Exception as e:
+            messages.error(request, f'Error sending announcement: {str(e)}')
+        
+        return redirect('admin_portal')
+    
+    return redirect('admin_portal')
+
+
+@staff_member_required
 def message_responses(request, message_id):
     """View responses to a specific message"""
     message = get_object_or_404(Message, id=message_id, sender=request.user, is_deleted=False)

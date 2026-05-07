@@ -9,6 +9,7 @@ urlpatterns = [
     path('member/<int:pk>/edit/', views.edit_member, name='edit_member'),
     path('messaging/', views.messaging_dashboard, name='messaging_dashboard'),
     path('messaging/compose/', views.compose_message, name='compose_message'),
+    path('quick-announcement/', views.quick_announcement, name='quick_announcement'),
     path('messaging/<uuid:message_id>/delete/', views.delete_message, name='delete_message'),
     path('messaging/<uuid:message_id>/restore/', views.restore_message, name='restore_message'),
     path('messaging/<uuid:message_id>/permanently-delete/', views.permanently_delete_message, name='permanently_delete_message'),

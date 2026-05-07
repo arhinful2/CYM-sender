@@ -36,6 +36,14 @@ db.sqlite3
 # Static files and media
 staticfiles/
 /static/
+# BUT track essential PWA and custom files needed for deployment
+!/static/manifest.json
+!/static/offline.html
+!/static/css/
+!/static/js/service-worker.js
+!/static/js/custom.js
+!/static/images/icon.svg
+!/static/images/default_profile.svg
 /media/
 
 # Environment variables and secrets
