@@ -20,9 +20,10 @@ from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+IS_VERCEL = bool(os.environ.get('VERCEL')) or bool(os.environ.get('VERCEL_ENV'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-fallback-change-in-vercel-env')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -172,7 +173,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Vercel / production static & media settings
 # Use Whitenoise for static files in production
 if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # Vercel deployments in this project do not run collectstatic in a persistent artifact.
+    # Use non-manifest storage in hosted runtime to avoid startup/runtime 500 errors.
+    if IS_VERCEL:
+        STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    else:
+        STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    WHITENOISE_MANIFEST_STRICT = False
 
 # Blob / object storage tokens (Vercel Blob or similar)
 # Set these in Vercel dashboard when using Vercel Blob or other provider
@@ -189,9 +196,13 @@ STORAGES = {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-        if not DEBUG else
-        'django.contrib.staticfiles.storage.StaticFilesStorage',
+        'BACKEND': (
+            'whitenoise.storage.CompressedStaticFilesStorage'
+            if (not DEBUG and IS_VERCEL) else
+            'whitenoise.storage.CompressedManifestStaticFilesStorage'
+            if not DEBUG else
+            'django.contrib.staticfiles.storage.StaticFilesStorage'
+        ),
     },
 }
 
