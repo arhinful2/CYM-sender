@@ -78,7 +78,8 @@ def admin_portal(request):
 
     # Message statistics
     total_messages = Message.objects.filter(is_deleted=False).count()
-    recent_messages = Message.objects.filter(is_deleted=False).order_by('-created_at')[:5]
+    recent_messages = Message.objects.filter(
+        is_deleted=False).order_by('-created_at')[:5]
 
     # Recent responses
     recent_responses = MessageResponse.objects.filter(
@@ -199,14 +200,15 @@ def member_detail(request, pk):
 def add_member(request):
     """Add new member via website form"""
     from members.forms import MemberRegistrationForm
-    
+
     if request.method == 'POST':
         form = MemberRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             member = form.save(commit=False)
             member.created_by = request.user
             member.save()
-            messages.success(request, f'✓ {member.full_name()} has been added successfully!')
+            messages.success(
+                request, f'✓ {member.full_name()} has been added successfully!')
             return redirect('member_detail', pk=member.pk)
         else:
             # Show errors
@@ -228,16 +230,19 @@ def add_member(request):
 def edit_member(request, pk):
     """Edit existing member"""
     from members.forms import MemberRegistrationForm
-    
+
     member = get_object_or_404(Member, pk=pk)
-    
+
     if request.method == 'POST':
-        form = MemberRegistrationForm(request.POST, request.FILES, instance=member)
+        form = MemberRegistrationForm(
+            request.POST, request.FILES, instance=member)
         if form.is_valid():
             member = form.save(commit=False)
-            member.updated_by = request.user  # Note: you may want to add this field to Member model
+            # Note: you may want to add this field to Member model
+            member.updated_by = request.user
             member.save()
-            messages.success(request, f'✓ {member.full_name()} has been updated successfully!')
+            messages.success(
+                request, f'✓ {member.full_name()} has been updated successfully!')
             return redirect('member_detail', pk=member.pk)
         else:
             # Show errors
@@ -260,7 +265,7 @@ def edit_member(request, pk):
 def messaging_dashboard(request):
     """Messaging dashboard"""
     from messaging.models import MessageTemplate
-    
+
     # Get all messages sent by current user (exclude deleted)
     sent_messages = Message.objects.filter(
         sender=request.user, is_deleted=False).order_by('-created_at')
@@ -275,7 +280,8 @@ def messaging_dashboard(request):
     ).select_related('respondent', 'message').order_by('-created_at')[:10]
 
     # Get active templates
-    templates = MessageTemplate.objects.filter(is_active=True).order_by('-updated_at')[:10]
+    templates = MessageTemplate.objects.filter(
+        is_active=True).order_by('-updated_at')[:10]
 
     context = {
         'sent_messages': sent_messages,
@@ -354,7 +360,8 @@ def restore_message_response(request, response_id):
     if request.method != 'POST':
         return HttpResponseBadRequest('Invalid request method')
 
-    response = get_object_or_404(MessageResponse, id=response_id, is_deleted=True)
+    response = get_object_or_404(
+        MessageResponse, id=response_id, is_deleted=True)
     response.is_deleted = False
     response.deleted_at = None
     response.save()
@@ -388,7 +395,8 @@ def permanently_delete_message_response(request, response_id):
     if request.method != 'POST':
         return HttpResponseBadRequest('Invalid request method')
 
-    response = get_object_or_404(MessageResponse, id=response_id, is_deleted=True)
+    response = get_object_or_404(
+        MessageResponse, id=response_id, is_deleted=True)
     response.delete()
     messages.success(request, 'Response permanently deleted.')
 
@@ -417,17 +425,21 @@ def trash_view(request):
         messages.success(request, f'{len(selected_ids)} response(s) restored.')
     elif action == 'delete_messages' and selected_ids:
         Message.objects.filter(id__in=selected_ids, is_deleted=True).delete()
-        messages.success(request, f'{len(selected_ids)} message(s) permanently deleted.')
+        messages.success(
+            request, f'{len(selected_ids)} message(s) permanently deleted.')
     elif action == 'delete_responses' and selected_ids:
-        MessageResponse.objects.filter(id__in=selected_ids, is_deleted=True).delete()
-        messages.success(request, f'{len(selected_ids)} response(s) permanently deleted.')
+        MessageResponse.objects.filter(
+            id__in=selected_ids, is_deleted=True).delete()
+        messages.success(
+            request, f'{len(selected_ids)} response(s) permanently deleted.')
     elif action == 'empty_trash':
         Message.objects.filter(is_deleted=True).delete()
         MessageResponse.objects.filter(is_deleted=True).delete()
         messages.success(request, 'Trash emptied.')
 
     # Get deleted messages and responses
-    deleted_messages = Message.objects.filter(is_deleted=True).order_by('-deleted_at')
+    deleted_messages = Message.objects.filter(
+        is_deleted=True).order_by('-deleted_at')
     deleted_responses = MessageResponse.objects.filter(is_deleted=True).select_related(
         'respondent', 'message').order_by('-deleted_at')
 
@@ -456,7 +468,8 @@ def bulk_delete_messages(request):
             is_deleted=True,
             deleted_at=timezone.now()
         )
-        messages.success(request, f'{len(selected_ids)} message(s) moved to trash.')
+        messages.success(
+            request, f'{len(selected_ids)} message(s) moved to trash.')
 
     next_url = request.POST.get('next') or request.META.get(
         'HTTP_REFERER') or '/portal/messaging/'
@@ -475,7 +488,8 @@ def bulk_delete_responses(request):
             is_deleted=True,
             deleted_at=timezone.now()
         )
-        messages.success(request, f'{len(selected_ids)} response(s) moved to trash.')
+        messages.success(
+            request, f'{len(selected_ids)} response(s) moved to trash.')
 
     next_url = request.POST.get('next') or request.META.get(
         'HTTP_REFERER') or '/portal/messaging/'
@@ -486,7 +500,7 @@ def bulk_delete_responses(request):
 def compose_message(request):
     """Compose and send messages"""
     from messaging.models import MessageTemplate
-    
+
     if request.method == 'POST':
         subject = request.POST.get('subject')
         content = request.POST.get('content')
@@ -598,7 +612,8 @@ def compose_message(request):
     # GET request - show form
     from messaging.models import MessageTemplate
     members = Member.objects.all()
-    templates = MessageTemplate.objects.filter(is_active=True).order_by('category', 'name')
+    templates = MessageTemplate.objects.filter(
+        is_active=True).order_by('category', 'name')
     return render(request, 'portal/compose_message.html', {
         'members': members,
         'templates': templates
@@ -611,12 +626,12 @@ def quick_announcement(request):
     if request.method == 'POST':
         title = request.POST.get('title', 'Announcement')
         content = request.POST.get('content', '').strip()
-        
+
         # Validate content is not empty
         if not content:
             messages.error(request, 'Announcement content cannot be empty.')
             return redirect('admin_portal')
-        
+
         try:
             # Create message as broadcast
             message = Message.objects.create(
@@ -628,21 +643,21 @@ def quick_announcement(request):
                 is_sent=True,
                 sent_at=timezone.now()
             )
-            
+
             # Get all active members
             recipients = Member.objects.filter(status='active')
-            
+
             # Create conversations for all members
             for member in recipients:
                 Conversation.objects.get_or_create(
                     message=message,
                     member=member
                 )
-            
+
             # Send SMS to all members with phone numbers
             sms_sent_count = 0
             sms_failed_count = 0
-            
+
             for member in recipients:
                 if member.phone_number:
                     phone = str(member.phone_number)
@@ -650,7 +665,7 @@ def quick_announcement(request):
                         phone,
                         f"{title}\n\n{content}"
                     )
-                    
+
                     # Create SMS Log
                     sms_log = SMSLog.objects.create(
                         message=message,
@@ -659,52 +674,57 @@ def quick_announcement(request):
                         content=content,
                         status='pending'
                     )
-                    
+
                     if sms_result.get('success'):
                         sms_log.status = 'sent'
-                        sms_log.provider_message_id = sms_result.get('message_id', '')
+                        sms_log.provider_message_id = sms_result.get(
+                            'message_id', '')
                         sms_log.sent_at = timezone.now()
                         sms_sent_count += 1
                     else:
                         sms_log.status = 'failed'
-                        sms_log.error_message = sms_result.get('error', 'Unknown error')
+                        sms_log.error_message = sms_result.get(
+                            'error', 'Unknown error')
                         sms_failed_count += 1
-                    
+
                     sms_log.save()
-            
+
             # Update message SMS status
             if sms_sent_count > 0:
                 message.sms_sent = True
                 message.save()
-            
+
             # Build success message
             success_msg = f'Announcement sent to {recipients.count()} members!'
             if sms_sent_count > 0:
                 success_msg += f' SMS delivered to {sms_sent_count} members.'
             if sms_failed_count > 0:
                 success_msg += f' {sms_failed_count} SMS failed.'
-            
+
             messages.success(request, success_msg)
-            
+
         except Exception as e:
             messages.error(request, f'Error sending announcement: {str(e)}')
-        
+
         return redirect('admin_portal')
-    
+
     return redirect('admin_portal')
 
 
 @staff_member_required
 def message_responses(request, message_id):
     """View responses to a specific message"""
-    message = get_object_or_404(Message, id=message_id, sender=request.user, is_deleted=False)
-    responses = message.responses.filter(is_deleted=False).select_related('respondent').all()
+    message = get_object_or_404(
+        Message, id=message_id, sender=request.user, is_deleted=False)
+    responses = message.responses.filter(
+        is_deleted=False).select_related('respondent').all()
 
     if request.method == 'POST' and 'reply' in request.POST:
         response_id = request.POST.get('response_id')
         reply_content = request.POST.get('reply_content')
 
-        response = get_object_or_404(MessageResponse, id=response_id, is_deleted=False)
+        response = get_object_or_404(
+            MessageResponse, id=response_id, is_deleted=False)
         response.admin_reply = reply_content
         response.replied_at = timezone.now()
         response.save()
@@ -792,7 +812,8 @@ def analytics_dashboard(request):
     week_end = today
     for _ in range(8):
         week_start = week_end - datetime.timedelta(days=6)
-        week_labels.insert(0, f"{week_start.strftime('%d %b')} - {week_end.strftime('%d %b')}")
+        week_labels.insert(
+            0, f"{week_start.strftime('%d %b')} - {week_end.strftime('%d %b')}")
         week_counts.insert(0, Attendance.objects.filter(
             is_deleted=False,
             service_date__gte=week_start,
@@ -802,12 +823,16 @@ def analytics_dashboard(request):
 
     current_week_start = today - datetime.timedelta(days=today.weekday())
     current_month_start = today.replace(day=1)
-    current_week_total = Attendance.objects.filter(is_deleted=False, service_date__gte=current_week_start, service_date__lte=today).count()
-    current_month_total = Attendance.objects.filter(is_deleted=False, service_date__gte=current_month_start, service_date__lte=today).count()
-    today_attendance_count = Attendance.objects.filter(is_deleted=False, service_date=today).count()
+    current_week_total = Attendance.objects.filter(
+        is_deleted=False, service_date__gte=current_week_start, service_date__lte=today).count()
+    current_month_total = Attendance.objects.filter(
+        is_deleted=False, service_date__gte=current_month_start, service_date__lte=today).count()
+    today_attendance_count = Attendance.objects.filter(
+        is_deleted=False, service_date=today).count()
 
     # Message statistics
-    total_messages = Message.objects.filter(sender=request.user, is_deleted=False).count()
+    total_messages = Message.objects.filter(
+        sender=request.user, is_deleted=False).count()
     broadcast_messages = Message.objects.filter(
         sender=request.user, is_broadcast=True, is_deleted=False).count()
     individual_messages = Message.objects.filter(
@@ -829,10 +854,12 @@ def analytics_dashboard(request):
         'special_event': 'Special Event',
     }
 
-    month_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    month_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May',
+                    'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     month_counts = [0] * 12
     for row in attendance_by_month:
-        month_index = int(row['month_num']) - 1 if row.get('month_num') else None
+        month_index = int(row['month_num']) - \
+            1 if row.get('month_num') else None
         if month_index is not None and 0 <= month_index < 12:
             month_counts[month_index] = row['count']
 
@@ -860,7 +887,8 @@ def analytics_dashboard(request):
             age_groups['36+'],
         ]),
         'attendance_service_labels': json.dumps([
-            service_labels.get(row['service_type'], row['service_type'].replace('_', ' ').title())
+            service_labels.get(
+                row['service_type'], row['service_type'].replace('_', ' ').title())
             for row in attendance_by_service
         ]),
         'attendance_service_data': json.dumps([row['count'] for row in attendance_by_service]),
@@ -1003,7 +1031,8 @@ def quick_attendance(request):
             member_ids = []
 
         if not service_type:
-            messages.error(request, 'Please select a service type before saving attendance.')
+            messages.error(
+                request, 'Please select a service type before saving attendance.')
             return redirect('quick_attendance')
 
         # Find already recorded attendances for these members
@@ -1033,14 +1062,16 @@ def quick_attendance(request):
             if mid in existing_ids:
                 m = members_map.get(mid)
                 if m:
-                    skipped.append(m.full_name() if callable(getattr(m, 'full_name', None)) else str(m))
+                    skipped.append(m.full_name() if callable(
+                        getattr(m, 'full_name', None)) else str(m))
                 continue
             if mid in deleted_map:
                 restored = deleted_map[mid]
                 restored.is_deleted = False
                 restored.deleted_at = None
                 restored.attended = True
-                restored.save(update_fields=['is_deleted', 'deleted_at', 'attended'])
+                restored.save(
+                    update_fields=['is_deleted', 'deleted_at', 'attended'])
                 created_count += 1
                 continue
             # create Attendance instance (but don't save yet)
@@ -1064,11 +1095,13 @@ def quick_attendance(request):
             else:
                 member = members_map.get(attendance.member_id)
                 if member:
-                    skipped.append(member.full_name() if callable(getattr(member, 'full_name', None)) else str(member))
+                    skipped.append(member.full_name() if callable(
+                        getattr(member, 'full_name', None)) else str(member))
 
         # Success and skipped messages
         if created_count > 0:
-            messages.success(request, f'Attendance recorded for {created_count} member(s)!')
+            messages.success(
+                request, f'Attendance recorded for {created_count} member(s)!')
         else:
             messages.info(request, 'Attendance recorded for 0 members.')
 
@@ -1078,7 +1111,8 @@ def quick_attendance(request):
             more = len(skipped) - len(skipped[:20])
             if more > 0:
                 names = f"{names} and {more} more"
-            messages.warning(request, f"These members were already recorded for {service_type} on {service_date}: {names}")
+            messages.warning(
+                request, f"These members were already recorded for {service_type} on {service_date}: {names}")
 
         return redirect('quick_attendance')
 
@@ -1097,9 +1131,11 @@ def quick_attendance(request):
 
     # Today's attendance stats (all service types)
     today = date.today()
-    today_attendance_count = Attendance.objects.filter(service_date=today, is_deleted=False).count()
+    today_attendance_count = Attendance.objects.filter(
+        service_date=today, is_deleted=False).count()
     total_active = active_members.count()
-    attendance_rate = round((today_attendance_count / total_active * 100), 2) if total_active > 0 else 0
+    attendance_rate = round(
+        (today_attendance_count / total_active * 100), 2) if total_active > 0 else 0
     today_attendance_records = Attendance.objects.filter(
         service_date=today,
         is_deleted=False,
@@ -1121,9 +1157,12 @@ def check_attendance(request):
     if request.method not in ('GET', 'POST'):
         return JsonResponse({'error': 'Invalid method'}, status=400)
 
-    service_type = request.POST.get('service_type') or request.GET.get('service_type')
-    service_date = request.POST.get('service_date') or request.GET.get('service_date')
-    member_ids = request.POST.getlist('member_ids[]') or request.GET.getlist('member_ids[]')
+    service_type = request.POST.get(
+        'service_type') or request.GET.get('service_type')
+    service_date = request.POST.get(
+        'service_date') or request.GET.get('service_date')
+    member_ids = request.POST.getlist(
+        'member_ids[]') or request.GET.getlist('member_ids[]')
 
     # parse date
     try:
@@ -1147,7 +1186,8 @@ def check_attendance(request):
             is_deleted=False
         ).select_related('member')
         for a in existing:
-            result['already'].append({'id': a.member_id, 'name': a.member.full_name()})
+            result['already'].append(
+                {'id': a.member_id, 'name': a.member.full_name()})
 
     return JsonResponse(result)
 
@@ -1161,7 +1201,8 @@ def _build_attendance_queryset(request, include_deleted=False):
         ('special_event', 'Special Event'),
     ]
 
-    qs = Attendance.objects.select_related('member').order_by('-service_date', '-check_in_time')
+    qs = Attendance.objects.select_related(
+        'member').order_by('-service_date', '-check_in_time')
     if include_deleted:
         qs = qs.filter(is_deleted=True)
     else:
@@ -1219,7 +1260,8 @@ def _build_attendance_queryset(request, include_deleted=False):
 @staff_member_required
 def attendance_history(request):
     """Show attendance records with filters, export CSV, edit, restore, and delete links."""
-    filter_state = _build_attendance_queryset(request, include_deleted=request.GET.get('deleted') == '1')
+    filter_state = _build_attendance_queryset(
+        request, include_deleted=request.GET.get('deleted') == '1')
     qs = filter_state['qs']
     SERVICE_TYPES = filter_state['SERVICE_TYPES']
     show_deleted = filter_state['include_deleted']
@@ -1237,11 +1279,15 @@ def attendance_history(request):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="attendance_export.csv"'
         writer = csv.writer(response)
-        writer.writerow(['Member ID', 'Member Name', 'Service Date', 'Service Type', 'Attended', 'Check-In Time', 'Notes'])
+        writer.writerow(['Member ID', 'Member Name', 'Service Date',
+                        'Service Type', 'Attended', 'Check-In Time', 'Notes'])
         for a in qs:
-            recorded_at = a.check_in_time if hasattr(a, 'check_in_time') else ''
-            member_name = a.member.full_name() if hasattr(a.member, 'full_name') else str(a.member)
-            writer.writerow([a.member.id, member_name, a.service_date, a.service_type, a.attended, recorded_at, a.notes])
+            recorded_at = a.check_in_time if hasattr(
+                a, 'check_in_time') else ''
+            member_name = a.member.full_name() if hasattr(
+                a.member, 'full_name') else str(a.member)
+            writer.writerow([a.member.id, member_name, a.service_date,
+                            a.service_type, a.attended, recorded_at, a.notes])
         return response
 
     if request.GET.get('print') == '1':
@@ -1293,12 +1339,14 @@ def delete_attendance(request, attendance_id):
 
     try:
         a = Attendance.objects.get(pk=attendance_id)
-        member_name = a.member.full_name() if hasattr(a.member, 'full_name') else str(a.member)
+        member_name = a.member.full_name() if hasattr(
+            a.member, 'full_name') else str(a.member)
         service_date = a.service_date
         a.is_deleted = True
         a.deleted_at = django_timezone.now()
         a.save(update_fields=['is_deleted', 'deleted_at'])
-        messages.success(request, f'Attendance record for {member_name} on {service_date} moved to trash.')
+        messages.success(
+            request, f'Attendance record for {member_name} on {service_date} moved to trash.')
     except Attendance.DoesNotExist:
         messages.error(request, 'Attendance record not found.')
 
@@ -1310,7 +1358,8 @@ def restore_attendance(request, attendance_id):
     if request.method != 'POST':
         return HttpResponseBadRequest('Invalid request method for restore.')
 
-    attendance = get_object_or_404(Attendance, pk=attendance_id, is_deleted=True)
+    attendance = get_object_or_404(
+        Attendance, pk=attendance_id, is_deleted=True)
     duplicate_exists = Attendance.objects.filter(
         member=attendance.member,
         service_date=attendance.service_date,
@@ -1318,7 +1367,8 @@ def restore_attendance(request, attendance_id):
         is_deleted=False,
     ).exclude(pk=attendance.pk).exists()
     if duplicate_exists:
-        messages.error(request, 'A live attendance record already exists for that member and service.')
+        messages.error(
+            request, 'A live attendance record already exists for that member and service.')
         return redirect('attendance_history')
 
     attendance.is_deleted = False
@@ -1333,7 +1383,8 @@ def permanently_delete_attendance(request, attendance_id):
     if request.method != 'POST':
         return HttpResponseBadRequest('Invalid request method for permanent deletion.')
 
-    attendance = get_object_or_404(Attendance, pk=attendance_id, is_deleted=True)
+    attendance = get_object_or_404(
+        Attendance, pk=attendance_id, is_deleted=True)
     attendance.delete()
     messages.success(request, 'Attendance record permanently deleted.')
     return redirect('attendance_history?deleted=1')
@@ -1358,7 +1409,8 @@ def edit_attendance(request, attendance_id):
 
         try:
             from datetime import datetime
-            service_date = datetime.strptime(service_date_str, '%Y-%m-%d').date()
+            service_date = datetime.strptime(
+                service_date_str, '%Y-%m-%d').date()
         except Exception:
             messages.error(request, 'Please provide a valid service date.')
             return redirect('edit_attendance', attendance_id=attendance_id)
@@ -1373,7 +1425,8 @@ def edit_attendance(request, attendance_id):
             service_type=service_type,
         ).exclude(pk=attendance.pk).exists()
         if duplicate_exists:
-            messages.error(request, 'Another attendance record already exists for that member, date, and service type.')
+            messages.error(
+                request, 'Another attendance record already exists for that member, date, and service type.')
             return redirect('edit_attendance', attendance_id=attendance_id)
 
         attendance.service_type = service_type
@@ -1396,7 +1449,8 @@ def edit_attendance(request, attendance_id):
 @staff_member_required
 def attendance_report(request):
     """Printable attendance report view."""
-    filter_state = _build_attendance_queryset(request, include_deleted=request.GET.get('deleted') == '1')
+    filter_state = _build_attendance_queryset(
+        request, include_deleted=request.GET.get('deleted') == '1')
     qs = filter_state['qs']
     today = date.today()
     total_records = qs.count()

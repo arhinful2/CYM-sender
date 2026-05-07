@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "python manage.py migrate && python manage.py collectstatic --noinput && python create_sample_templates.py",
   "builds": [
     {
       "src": "api/index.py",

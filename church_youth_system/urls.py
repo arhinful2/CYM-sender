@@ -23,24 +23,30 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.templatetags.static import static as static_url
-from portal.views import home 
+from portal.views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('portal/', include('portal.urls')),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('accounts/login/', auth_views.LoginView.as_view(
+        template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('favicon.ico', RedirectView.as_view(url=static_url('images/icon.svg')), name='favicon-ico'),
-    path('favicon.png', RedirectView.as_view(url=static_url('images/icon.svg')), name='favicon-png'),
-    path('', home, name='home'), 
+    path('favicon.ico', RedirectView.as_view(
+        url=static_url('images/icon.svg')), name='favicon-ico'),
+    path('favicon.png', RedirectView.as_view(
+        url=static_url('images/icon.svg')), name='favicon-png'),
+    path('', home, name='home'),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
 elif getattr(settings, 'IS_VERCEL', False):
     # Allow media fallback serving in hosted runtime when files are not absolute blob URLs.
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
 
 # Customize admin site
 admin.site.site_header = "Youth Church Management System"
