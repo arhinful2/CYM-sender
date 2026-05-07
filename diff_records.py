@@ -30,6 +30,7 @@ for c in critical:
 
 out = {}
 
+
 def _normalize(v):
     if isinstance(v, (bytes, bytearray)):
         try:
@@ -87,8 +88,10 @@ for app_label, model_name in mismatch_models:
 # Save report
 # Normalize PKs and any remaining values to JSON-serializable types
 for key, val in out.items():
-    val['missing_in_default'] = [_normalize(x) for x in val.get('missing_in_default', [])]
-    val['missing_in_sqlite'] = [_normalize(x) for x in val.get('missing_in_sqlite', [])]
+    val['missing_in_default'] = [_normalize(
+        x) for x in val.get('missing_in_default', [])]
+    val['missing_in_sqlite'] = [_normalize(
+        x) for x in val.get('missing_in_sqlite', [])]
     for item in val.get('field_diffs', []):
         item['pk'] = _normalize(item.get('pk'))
         # diffs already normalized
