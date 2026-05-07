@@ -1,18 +1,21 @@
 {
-  "buildCommand": "pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput",
-  "devCommand": "python manage.py runserver 0.0.0.0:3000",
-  "env": {
-    "PYTHON_VERSION": "3.12"
-  },
-  "functions": {
-    "church_youth_system/wsgi.py": {
-      "maxDuration": 30
-    }
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/church_youth_system/wsgi.py"
+      "src": "church_youth_system/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.12"
+      }
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "church_youth_system/wsgi.py"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.12.0"
+  }
 }
