@@ -25,6 +25,7 @@ from datetime import date  # If not already imported
 from members.models import Attendance  # If not already imported
 from django.shortcuts import redirect  # If not already imported
 from django.db.models import Case, When, Value, IntegerField
+from django.db.models.functions import ExtractMonth
 from django.utils import timezone as django_timezone
 
 
@@ -690,7 +691,9 @@ def analytics_dashboard(request):
     attendance_by_month = Attendance.objects.filter(
         is_deleted=False,
         service_date__year=today.year
-    ).extra(select={'month_num': "strftime('%%m', service_date)"}).values('month_num').annotate(
+    ).annotate(
+        month_num=ExtractMonth('service_date')
+    ).values('month_num').annotate(
         count=Count('id')
     ).order_by('month_num')
 

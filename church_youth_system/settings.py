@@ -170,6 +170,10 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+if IS_VERCEL:
+    # Vercel filesystem is read-only except /tmp.
+    MEDIA_ROOT = Path('/tmp/media')
+
 # Vercel / production static & media settings
 # Use Whitenoise for static files in production
 if not DEBUG:
@@ -206,7 +210,7 @@ STORAGES = {
     },
 }
 
-if USE_VERCEL_BLOB_STORAGE and blob_token:
+if (USE_VERCEL_BLOB_STORAGE or IS_VERCEL) and blob_token:
     STORAGES['default'] = {
         'BACKEND': 'church_youth_system.storage_backends.VercelBlobStorage',
     }
