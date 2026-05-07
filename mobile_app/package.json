@@ -1,0 +1,27 @@
+{
+  "name": "cym-mobile-wrapper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capacitor Android wrapper for Church Youth Management web app",
+  "scripts": {
+    "cap:sync": "npx cap sync",
+    "cap:copy": "npx cap copy",
+    "cap:add:android": "npx cap add android",
+    "cap:open:android": "npx cap open android",
+    "assets:generate": "npx capacitor-assets generate --android",
+    "android:setup": "powershell -ExecutionPolicy Bypass -File .\\scripts\\setup-android.ps1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0",
+    "typescript": "^6.0.3"
+  }
+}

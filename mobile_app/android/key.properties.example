@@ -1,0 +1,6 @@
+# Copy this file to key.properties and fill in real values.
+# Never commit key.properties or keystore files.
+storeFile=../keystore/release-key.jks
+storePassword=CHANGE_ME
+keyAlias=release
+keyPassword=CHANGE_ME
