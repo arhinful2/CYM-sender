@@ -151,7 +151,11 @@ class MessageService:
         """Send SMS using configured provider"""
         from .models import SMSConfiguration
 
-        config = SMSConfiguration.objects.filter(is_active=True).first()
+        try:
+            config = SMSConfiguration.objects.filter(is_active=True).first()
+        except Exception as db_error:
+            # If database isn't ready (cold start), gracefully fail with diagnostic info
+            return {'success': False, 'error': f'Database connection issue: {str(db_error)[:100]}'}
 
         if not config:
             return {'success': False, 'error': 'No SMS configuration found'}
