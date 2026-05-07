@@ -38,6 +38,9 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+elif getattr(settings, 'IS_VERCEL', False):
+    # Allow media fallback serving in hosted runtime when files are not absolute blob URLs.
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Customize admin site
 admin.site.site_header = "Youth Church Management System"

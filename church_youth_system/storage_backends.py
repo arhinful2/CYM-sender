@@ -6,7 +6,12 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
 
-from vercel_blob import delete, head, put
+try:
+    from vercel_blob import delete, head, put
+except Exception:
+    delete = None
+    head = None
+    put = None
 
 
 @deconstructible
@@ -27,13 +32,24 @@ class VercelBlobStorage(Storage):
         normalized = self._normalize_name(name)
         if normalized.startswith("http://") or normalized.startswith("https://"):
             return normalized
+
+        # If only a pathname is stored and a token is available, try resolving public URL.
+        if self.token and head:
+            try:
+                metadata = head(normalized, {"token": self.token})
+                resolved_url = metadata.get("url", "")
+                if resolved_url:
+                    return resolved_url
+            except Exception:
+                pass
+
         if not self.base_url:
             # Fallback to MEDIA-style URL when explicit blob base URL is not configured.
             return f"/media/{normalized}"
         return f"{self.base_url}/{quote(normalized)}"
 
     def _save(self, name, content):
-        if not self.token:
+        if not self.token or not put:
             raise ValueError(
                 "BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN is required for Vercel Blob storage.")
 
@@ -51,12 +67,12 @@ class VercelBlobStorage(Storage):
         return blob.get("url") or blob.get("pathname", normalized_name)
 
     def delete(self, name):
-        if not name or not self.token:
+        if not name or not self.token or not delete:
             return
         delete(self._build_url(name), {"token": self.token})
 
     def exists(self, name):
-        if not name or not self.token:
+        if not name or not self.token or not head:
             return False
         try:
             head(self._build_url(name), {"token": self.token})
@@ -65,7 +81,7 @@ class VercelBlobStorage(Storage):
             return False
 
     def size(self, name):
-        if not name or not self.token:
+        if not name or not self.token or not head:
             return 0
         try:
             metadata = head(self._build_url(name), {"token": self.token})
