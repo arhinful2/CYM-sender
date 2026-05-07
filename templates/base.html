@@ -65,6 +65,32 @@
         .content {
             padding: 20px;
         }
+
+        .mobile-menu-toggle {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 767.98px) {
+            .sidebar {
+                min-height: auto;
+                padding: 12px 0;
+                border-radius: 0 0 10px 10px;
+                margin-bottom: 12px;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            main.col-md-9 {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+
+            .navbar .navbar-brand {
+                font-size: 1rem;
+            }
+        }
         
         .card {
             border-radius: 10px;
@@ -148,6 +174,10 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
+            <button class="navbar-toggler mobile-menu-toggle d-md-none me-2" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
             <a class="navbar-brand" href="{% url 'admin_portal' %}">
                 <i class="fas fa-church me-2"></i>Youth Church Management
             </a>
@@ -166,7 +196,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div id="sidebarMenu" class="col-12 col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -252,6 +282,19 @@
                 .then(reg => console.log('Service Worker registered'))
                 .catch(err => console.log('Service Worker failed:', err));
         }
+
+        // Close mobile sidebar after selecting any menu item.
+        document.querySelectorAll('#sidebarMenu .nav-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth < 768) {
+                    var sidebar = document.getElementById('sidebarMenu');
+                    if (sidebar && sidebar.classList.contains('show')) {
+                        var collapseInstance = bootstrap.Collapse.getInstance(sidebar) || new bootstrap.Collapse(sidebar, { toggle: false });
+                        collapseInstance.hide();
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
