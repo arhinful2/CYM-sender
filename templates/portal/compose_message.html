@@ -149,6 +149,23 @@
               </div>
             </div>
 
+            <div class="mb-4" id="gender-filter-section">
+              <label class="form-label">Filter by Gender (Optional)</label>
+              <div class="btn-group w-100 gender-filter-group" role="group" aria-label="Gender filter selector">
+                <input type="radio" class="btn-check" name="gender_filter" id="gender_all" value="" checked />
+                <label class="btn btn-outline-secondary" for="gender_all"><i class="fas fa-users me-1"></i> All Members</label>
+
+                <input type="radio" class="btn-check" name="gender_filter" id="gender_male" value="M" />
+                <label class="btn btn-outline-info" for="gender_male"><i class="fas fa-mars me-1"></i> Males Only</label>
+
+                <input type="radio" class="btn-check" name="gender_filter" id="gender_female" value="F" />
+                <label class="btn btn-outline-danger" for="gender_female"><i class="fas fa-venus me-1"></i> Females Only</label>
+
+                <input type="radio" class="btn-check" name="gender_filter" id="gender_other" value="O" />
+                <label class="btn btn-outline-secondary" for="gender_other"><i class="fas fa-user me-1"></i> Other</label>
+              </div>
+            </div>
+
             <div class="mb-4" id="recipients-section" style="display: none;">
               <label class="form-label" for="recipient-search">Select Recipients</label>
               <div class="mb-3 position-relative">
@@ -321,7 +338,7 @@
     searchTimeout = setTimeout(() => {
       $.ajax({
         url: '{% url "ajax_search_members" %}',
-        data: { q: query },
+        data: { q: query, gender: window.selectedGenderFilter || '' },
         success: function (data) {
           if (data.results && data.results.length > 0) {
             searchResults.innerHTML = "";
@@ -422,7 +439,7 @@
 
       $.ajax({
         url: '{% url "ajax_search_members" %}',
-        data: { q: "", status: "active" },
+        data: { q: "", status: "active", gender: window.selectedGenderFilter || '' },
         success: function (data) {
           if (data.results && data.results.length > 0) {
             data.results.forEach((member) => {
@@ -478,7 +495,7 @@
 
     $.ajax({
       url: '{% url "ajax_search_members" %}',
-      data: { q: "", all: "true" },
+      data: { q: "", all: "true", gender: window.selectedGenderFilter || '' },
       success: function (data) {
         if (data.results && data.results.length > 0) {
           data.results.forEach((member) => {
@@ -525,6 +542,38 @@
     updateSelectedRecipients();
     updateRecipientsInput();
   });
+
+  // Gender filter functionality
+  const genderFilterRadios = document.querySelectorAll(
+    'input[name="gender_filter"]',
+  );
+
+  genderFilterRadios.forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const selectedGender = this.value; // '', 'M', 'F', or 'O'
+      
+      // Clear existing recipients when gender filter changes
+      selectedRecipients = [];
+      updateSelectedRecipients();
+      updateRecipientsInput();
+      
+      // Clear search results
+      const searchResults = document.getElementById("search-results");
+      searchResults.innerHTML = "";
+      searchResults.style.display = "none";
+      
+      // Clear search input
+      const searchInput = document.getElementById("recipient-search");
+      searchInput.value = "";
+      
+      // Update the AJAX search calls to include gender filter
+      // This affects subsequent searches made by the user
+      window.selectedGenderFilter = selectedGender;
+    });
+  });
+
+  // Initialize gender filter
+  window.selectedGenderFilter = "";
 
   // Message preview
   const contentTextarea = document.getElementById("content");

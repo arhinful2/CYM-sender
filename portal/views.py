@@ -72,6 +72,9 @@ def permission_required(permission_name):
 @staff_member_required
 def admin_portal(request):
     """Main admin portal dashboard"""
+    from datetime import date
+    from django.db.models import Q
+    
     total_members = Member.objects.count()
     active_members = Member.objects.filter(status='active').count()
     recent_members = Member.objects.order_by('-date_joined')[:5]
@@ -86,6 +89,13 @@ def admin_portal(request):
         is_deleted=False).select_related(
         'respondent', 'message').order_by('-created_at')[:5]
 
+    # Birthday members - today's birthdays
+    today = date.today()
+    birthday_members = Member.objects.filter(
+        Q(date_of_birth__month=today.month) & 
+        Q(date_of_birth__day=today.day)
+    ).exclude(date_of_birth__isnull=True).order_by('first_name')
+
     context = {
         'total_members': total_members,
         'active_members': active_members,
@@ -93,6 +103,7 @@ def admin_portal(request):
         'total_messages': total_messages,
         'recent_messages': recent_messages,
         'recent_responses': recent_responses,
+        'birthday_members': birthday_members,
     }
     return render(request, 'portal/dashboard.html', context)
 
@@ -647,13 +658,25 @@ def compose_message(request):
 
     # GET request - show form
     from messaging.models import MessageTemplate
-    members = Member.objects.all()
+    
+    # Support gender filtering in query params
+    gender_filter = request.GET.get('gender', '')  # '', 'M', 'F', or 'O'
+    
+    if gender_filter in ['M', 'F', 'O']:
+        members = Member.objects.filter(gender=gender_filter)
+    else:
+        members = Member.objects.all()
+    
     templates = MessageTemplate.objects.filter(
         is_active=True).order_by('category', 'name')
-    return render(request, 'portal/compose_message.html', {
+    
+    context = {
         'members': members,
-        'templates': templates
-    })
+        'templates': templates,
+        'selected_gender_filter': gender_filter,
+    }
+    
+    return render(request, 'portal/compose_message.html', context)
 
 
 @staff_member_required
@@ -944,17 +967,23 @@ def ajax_search_members(request):
     """AJAX endpoint for member search suggestions"""
     query = request.GET.get('q', '')
     status = request.GET.get('status', '')
+    gender = request.GET.get('gender', '')  # NEW: Gender filter support
     get_all = request.GET.get('all', '')
+
+    # Start with base queryset, applying gender filter if specified
+    base_qs = Member.objects.all()
+    if gender in ['M', 'F', 'O']:
+        base_qs = base_qs.filter(gender=gender)
 
     # Handle "Select All Members" request
     if get_all == 'true':
-        members = Member.objects.all()[:100]  # Limit to 100 for safety
+        members = base_qs[:100]  # Limit to 100 for safety
     # Handle "Select Active Members" request
     elif status == 'active':
-        members = Member.objects.filter(status='active')[:100]
+        members = base_qs.filter(status='active')[:100]
     # Handle search query
     elif len(query) >= 2:
-        members = Member.objects.filter(
+        members = base_qs.filter(
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query) |
             Q(phone_number__icontains=query) |
