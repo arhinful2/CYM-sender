@@ -264,30 +264,40 @@ def edit_member(request, pk):
 @staff_member_required
 def messaging_dashboard(request):
     """Messaging dashboard"""
-    from messaging.models import MessageTemplate
+    from messaging.models import MessageTemplate, MessageResponse
 
-    # Get all messages sent by current user (exclude deleted)
-    sent_messages = Message.objects.filter(
-        sender=request.user, is_deleted=False).order_by('-created_at')
+    # Database-wide message stats so the dashboard reflects real system data.
+    sent_messages = Message.objects.filter(is_deleted=False).order_by('-created_at')
 
-    # Get messages with responses
-    messages_with_responses = sent_messages.filter(
-        responses__is_deleted=False).distinct()
+    # Messages that have at least one active response.
+    messages_with_responses = Message.objects.filter(
+        responses__is_deleted=False,
+        is_deleted=False,
+    ).distinct().order_by('-created_at')
 
-    # Get recent responses (exclude deleted)
+    # Recent responses across the system.
     recent_responses = MessageResponse.objects.filter(
-        message__sender=request.user, is_deleted=False
+        is_deleted=False
     ).select_related('respondent', 'message').order_by('-created_at')[:10]
 
-    # Get active templates
+    # Unread means responses that have not been answered by an admin yet.
+    unread_responses = MessageResponse.objects.filter(
+        is_deleted=False,
+        admin_reply='',
+    ).count()
+
     templates = MessageTemplate.objects.filter(
-        is_active=True).order_by('-updated_at')[:10]
+        is_active=True).order_by('-updated_at')
 
     context = {
         'sent_messages': sent_messages,
-        'messages_with_responses': messages_with_responses,
+        'total_messages_count': sent_messages.count(),
+        'messages_with_responses_count': messages_with_responses.count(),
         'recent_responses': recent_responses,
+        'recent_responses_count': recent_responses.count(),
+        'unread_responses_count': unread_responses,
         'templates': templates,
+        'templates_count': templates.count(),
     }
     return render(request, 'portal/messaging_dashboard.html', context)
 

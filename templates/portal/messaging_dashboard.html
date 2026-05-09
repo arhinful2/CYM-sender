@@ -97,7 +97,7 @@
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
                     <div class="card-body">
-                        <h3>{{ sent_messages.count }}</h3>
+                        <h3>{{ total_messages_count }}</h3>
                         <p class="text-muted mb-0">Total Messages</p>
                     </div>
                 </div>
@@ -105,7 +105,7 @@
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
                     <div class="card-body">
-                        <h3>{{ messages_with_responses.count }}</h3>
+                        <h3>{{ messages_with_responses_count }}</h3>
                         <p class="text-muted mb-0">With Responses</p>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
                     <div class="card-body">
-                        <h3>{{ recent_responses|length }}</h3>
+                        <h3>{{ recent_responses_count }}</h3>
                         <p class="text-muted mb-0">Recent Responses</p>
                     </div>
                 </div>
@@ -121,7 +121,7 @@
             <div class="col-6 col-lg-3">
                 <div class="card text-center stat-card h-100">
                     <div class="card-body">
-                        <h3>0</h3>
+                        <h3>{{ unread_responses_count }}</h3>
                         <p class="text-muted mb-0">Unread</p>
                     </div>
                 </div>
