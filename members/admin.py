@@ -79,13 +79,21 @@ class MemberAdmin(ImportExportModelAdmin):
     def photo_thumbnail(self, obj):
         if obj.photo:
             return format_html('<img src="{}" width="50" height="50" style="border-radius: 50%;" />', obj.photo.url)
-        return format_html('<img src="{}" width="50" height="50" style="border-radius: 50%;" />', static('images/default_profile.svg'))
+        # Show initials in a styled circle if no photo
+        return format_html(
+            '<div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">{}</div>',
+            obj.member_initials
+        )
     photo_thumbnail.short_description = 'Photo'
     
     def photo_preview(self, obj):
         if obj.photo:
             return format_html('<img src="{}" width="150" height="150" style="border-radius: 10px;" />', obj.photo.url)
-        return "No photo uploaded"
+        # Show initials in a styled circle for preview
+        return format_html(
+            '<div style="width: 150px; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 2.5rem;">{}</div>',
+            obj.member_initials
+        )
     photo_preview.short_description = 'Photo Preview'
     
     def get_queryset(self, request):

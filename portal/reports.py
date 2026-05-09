@@ -100,7 +100,7 @@ class ReportGenerator:
                 member.status,
                 member.date_joined,
                 member.date_of_birth,
-                member.age(),
+                member.age or '',  # age is now a property; handle None
                 member.get_gender_display(),
                 member.department or ''
             ])
@@ -128,7 +128,7 @@ class ReportGenerator:
                 member.email,
                 member.status,
                 member.date_joined,
-                member.age()
+                member.age or ''  # age is now a property; handle None
             ])
         
         return response

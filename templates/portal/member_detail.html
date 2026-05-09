@@ -25,9 +25,11 @@
         <div class="card mb-4">
             <div class="card-body text-center">
                 {% if member.photo %}
-                <img src="{{ member.photo.url }}" class="member-photo mb-3">
+                <img src="{{ member.photo.url }}" class="member-photo mb-3" alt="Profile photo">
                 {% else %}
-                <img src="/static/images/default_profile.png" class="member-photo mb-3">
+                <div class="member-photo mb-3 d-flex align-items-center justify-content-center" style="width: 200px; height: 200px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white; font-size: 3rem; font-weight: bold;">
+                    {{ member.member_initials }}
+                </div>
                 {% endif %}
                 <h4>{{ member.full_name }}</h4>
                 <p class="text-muted">{{ member.department }}</p>
@@ -70,8 +72,8 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Date of Birth:</strong> {{ member.date_of_birth }}</p>
-                        <p><strong>Age:</strong> {{ member.age }}</p>
+                        <p><strong>Date of Birth:</strong> {{ member.date_of_birth|default:"Not recorded" }}</p>
+                        <p><strong>Age:</strong> {{ member.age|default:"Not available" }}</p>
                         <p><strong>Gender:</strong> {{ member.get_gender_display }}</p>
                     </div>
                     <div class="col-md-6">

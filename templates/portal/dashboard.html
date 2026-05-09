@@ -71,9 +71,11 @@
                             <tr style="cursor: pointer;" onclick="window.location='{% url 'member_detail' member.pk %}'">
                                 <td>
                                     {% if member.photo %}
-                                    <img src="{{ member.photo.url }}" class="profile-img-sm">
+                                    <img src="{{ member.photo.url }}" class="profile-img-sm" alt="Profile photo">
                                     {% else %}
-                                    <img src="{% static 'images/default_profile.svg' %}" class="profile-img-sm">
+                                    <div class="profile-img-sm d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; color: white; font-weight: bold; font-size: 0.85rem;">
+                                        {{ member.member_initials }}
+                                    </div>
                                     {% endif %}
                                 </td>
                                 <td>{{ member.full_name }}</td>

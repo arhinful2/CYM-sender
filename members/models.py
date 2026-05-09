@@ -85,7 +85,11 @@ class Member(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.middle_name} {self.last_name}".strip()
     
+    @property
     def age(self):
+        """Calculate member age from date_of_birth. Returns None if date_of_birth is not set."""
+        if not self.date_of_birth:
+            return None
         from datetime import date
         today = date.today()
         return today.year - self.date_of_birth.year - (
@@ -93,10 +97,21 @@ class Member(models.Model):
         )
     
     @property
+    def member_initials(self):
+        """Generate initials from first and last name for profile picture fallback."""
+        initials = ""
+        if self.first_name:
+            initials += self.first_name[0].upper()
+        if self.last_name:
+            initials += self.last_name[0].upper()
+        return initials or "?"
+    
+    @property
     def photo_url(self):
+        """Return photo URL or None to use initials fallback in template."""
         if self.photo and hasattr(self.photo, 'url'):
             return self.photo.url
-        return '/static/images/default_profile.png'
+        return None
     
     def save(self, *args, **kwargs):
         # If this is a new member and date_joined wasn't set, set it to today

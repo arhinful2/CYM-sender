@@ -101,11 +101,12 @@ class DashboardWidgets:
         
         for member in members:
             days_until = member.days_until_birthday
-            if 0 <= days_until <= 30:
+            age = member.age  # age is now a property, not a method
+            if age is not None and 0 <= days_until <= 30:
                 birthdays.append({
                     'member': member,
                     'days_until': days_until,
-                    'age': member.age() + 1 if days_until == 0 else member.age()
+                    'age': age + 1 if days_until == 0 else age
                 })
         
         # Sort by days until birthday
