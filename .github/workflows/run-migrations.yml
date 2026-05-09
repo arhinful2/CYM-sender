@@ -19,7 +19,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Run migrations
+      - name: Run migrations and ensure templates
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
@@ -27,3 +27,5 @@ jobs:
         run: |
           echo "Running migrations"
           python manage.py migrate --noinput
+          echo "Ensuring default message templates"
+          python manage.py ensure_default_templates

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "python manage.py migrate --noinput && python manage.py collectstatic --noinput",
+  "buildCommand": "python manage.py migrate --noinput && python manage.py ensure_default_templates && python manage.py collectstatic --noinput",
   "builds": [
     {
       "src": "api/index.py",
