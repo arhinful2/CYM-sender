@@ -303,6 +303,32 @@ def messaging_dashboard(request):
 
 
 @staff_member_required
+def messaging_status(request):
+    """Return JSON with messaging-related counts for quick hosted diagnostics."""
+    # Import here to avoid top-level import issues
+    from messaging.models import MessageTemplate
+
+    templates_qs = MessageTemplate.objects.filter(is_active=True)
+    total_templates = templates_qs.count()
+    templates_preview = list(templates_qs.order_by('category', 'name').values_list('name', flat=True)[:20])
+
+    total_messages = Message.objects.filter(is_deleted=False).count()
+    messages_with_responses = Message.objects.filter(responses__is_deleted=False, is_deleted=False).distinct().count()
+    recent_responses_count = MessageResponse.objects.filter(is_deleted=False).count()
+    unread_responses = MessageResponse.objects.filter(is_deleted=False, admin_reply='').count()
+
+    data = {
+        'total_templates': total_templates,
+        'templates_preview': templates_preview,
+        'total_messages': total_messages,
+        'messages_with_responses': messages_with_responses,
+        'recent_responses_count': recent_responses_count,
+        'unread_responses': unread_responses,
+    }
+    return JsonResponse(data)
+
+
+@staff_member_required
 def delete_message(request, message_id):
     """Soft delete a message (move to trash)."""
     if request.method != 'POST':
