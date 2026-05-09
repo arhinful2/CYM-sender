@@ -103,6 +103,7 @@ class Command(BaseCommand):
         ]
 
         created_count = 0
+        updated_count = 0
         for template_data in templates_data:
             template, created = MessageTemplate.objects.get_or_create(
                 name=template_data['name'],
@@ -119,8 +120,38 @@ class Command(BaseCommand):
                 created_count += 1
                 self.stdout.write(f'  ✓ Created: {template.name}')
             else:
-                self.stdout.write(f'  - Exists: {template.name}')
+                # Ensure existing templates are active and have correct content
+                needs_update = False
+                if not template.is_active:
+                    template.is_active = True
+                    needs_update = True
+                if template.template_type != template_data['template_type']:
+                    template.template_type = template_data['template_type']
+                    needs_update = True
+                if template.content != template_data['content']:
+                    template.content = template_data['content']
+                    needs_update = True
+                if template.subject != template_data['subject']:
+                    template.subject = template_data['subject']
+                    needs_update = True
+                if template.category != template_data['category']:
+                    template.category = template_data['category']
+                    needs_update = True
+                
+                if needs_update:
+                    template.save()
+                    updated_count += 1
+                    self.stdout.write(f'  ↻ Updated: {template.name}')
+                else:
+                    self.stdout.write(f'  - Exists: {template.name}')
 
+        # Verify all templates are active
+        inactive_count = MessageTemplate.objects.filter(is_active=False).count()
+        if inactive_count > 0:
+            self.stdout.write(self.style.WARNING(f'⚠ Found {inactive_count} inactive templates. Activating...'))
+            MessageTemplate.objects.filter(is_active=False).update(is_active=True)
+
+        final_count = MessageTemplate.objects.count()
         self.stdout.write(
-            self.style.SUCCESS(f'\n✓ Template setup complete: {created_count} new templates created, {len(templates_data) - created_count} already exist')
+            self.style.SUCCESS(f'\n✓ Template setup complete: {created_count} new created, {updated_count} updated, {final_count} total templates (all active)')
         )
