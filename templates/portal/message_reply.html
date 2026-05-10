@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Reply to Message - Youth Church Management{% endblock %}
+
+{% block extra_css %}
+<style>
+  .reply-page .hero-card {
+    border: none;
+    border-radius: 0.9rem;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.12), rgba(46, 204, 113, 0.08));
+  }
+
+  .reply-page .reply-card {
+    border: none;
+    border-radius: 0.9rem;
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.08);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reply-page">
+  <div class="card hero-card mb-4">
+    <div class="card-body p-4 p-md-5">
+      <h1 class="h3 mb-2"><i class="fas fa-reply me-2"></i>Reply to Message</h1>
+      <p class="text-muted mb-0">Type your response below and submit it to send it back to the church team.</p>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      {% if success %}
+      <div class="alert alert-success">{{ success }}</div>
+      {% endif %}
+      {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endif %}
+
+      <div class="card reply-card">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+          <h2 class="h5 mb-1">{{ message.subject }}</h2>
+          <p class="text-muted small mb-0">From {{ message.sender.get_full_name|default:message.sender.username }} to {{ member.full_name }}{% if member.phone_number %} - {{ member.phone_number }}{% endif %}</p>
+        </div>
+        <div class="card-body px-4 pb-4">
+          <div class="mb-4 p-3 rounded bg-light border">
+            <strong>Message:</strong>
+            <p class="mb-0 mt-2">{{ message.content|linebreaksbr }}</p>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="response_content" class="form-label">Your Response</label>
+              <textarea class="form-control" id="response_content" name="response_content" rows="6" placeholder="Type your reply here...">{% if existing_response %}{{ existing_response.response_content }}{% endif %}</textarea>
+              <div class="form-text">Your response will be saved against your member profile and shown in the admin portal.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-paper-plane me-1"></i> Submit Reply
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

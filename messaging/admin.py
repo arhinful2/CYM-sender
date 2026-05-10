@@ -17,16 +17,20 @@ from django.urls import reverse
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('subject', 'sender', 'message_type', 'created_at',
-                    'is_sent', 'recipients_count', 'responses_count', 'deleted_badge')
-    list_filter = ('message_type', 'is_sent', 'is_deleted', 'created_at', 'sender')
+                    'is_sent', 'allow_member_replies', 'recipients_count', 'responses_count', 'deleted_badge')
+    list_filter = ('message_type', 'is_sent', 'allow_member_replies', 'is_deleted', 'created_at', 'sender')
     search_fields = ('subject', 'content', 'sender__username')
-    readonly_fields = ('created_at', 'sent_at', 'deleted_at', 'responses_count_display')
+    readonly_fields = ('created_at', 'sent_at', 'deleted_at', 'responses_count_display', 'reply_link_preview')
     filter_horizontal = ('recipients',)
     date_hierarchy = 'created_at'
 
     fieldsets = (
         ('Message Details', {
             'fields': ('sender', 'subject', 'content', 'message_type')
+        }),
+        ('Reply Link', {
+            'fields': ('allow_member_replies', 'reply_token', 'reply_link_preview'),
+            'description': 'Enable this to append a secure reply link for members.'
         }),
         ('Recipients', {
             'fields': ('recipients',),
@@ -76,6 +80,13 @@ class MessageAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">{} Responses</a>', url, count)
     responses_count_display.short_description = 'Total Responses'
 
+    def reply_link_preview(self, obj):
+        if not obj.pk:
+            return 'Save the message to generate a reply link.'
+        url = f'/portal/messaging/{obj.id}/reply/<member_id>/{obj.reply_token}/'
+        return format_html('<code style="white-space: normal;">{}</code>', url)
+    reply_link_preview.short_description = 'Reply Link Preview'
+
     def save_model(self, request, obj, form, change):
         if not obj.pk:
             obj.sender = request.user
@@ -114,17 +125,17 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(MessageResponse)
 class MessageResponseAdmin(admin.ModelAdmin):
-    list_display = ('message', 'respondent', 'created_at',
+    list_display = ('message', 'respondent', 'respondent_phone', 'created_at',
                     'has_admin_reply', 'is_acknowledgment', 'is_reply', 'deleted_badge')
     list_filter = ('is_acknowledgment', 'is_reply', 'is_deleted', 'created_at', 'replied_at')
     search_fields = ('response_content', 'respondent__first_name',
-                     'respondent__last_name', 'message__subject')
-    readonly_fields = ('created_at', 'replied_at', 'deleted_at', 'admin_reply_preview')
+                     'respondent__last_name', 'respondent_phone', 'message__subject')
+    readonly_fields = ('created_at', 'replied_at', 'deleted_at', 'admin_reply_preview', 'respondent_phone')
     autocomplete_fields = ['message', 'respondent']
 
     fieldsets = (
         ('Response Details', {
-            'fields': ('message', 'respondent', 'response_content', 'is_acknowledgment', 'is_reply')
+            'fields': ('message', 'respondent', 'respondent_phone', 'response_content', 'is_acknowledgment', 'is_reply')
         }),
         ('Admin Reply', {
             'fields': ('admin_reply', 'admin_reply_preview', 'replied_at')
@@ -161,6 +172,10 @@ class MessageResponseAdmin(admin.ModelAdmin):
     admin_reply_preview.short_description = 'Reply Preview'
 
     def save_model(self, request, obj, form, change):
+        # Keep the responder phone in sync for auditing and reporting.
+        if obj.respondent and not obj.respondent_phone:
+            obj.respondent_phone = str(obj.respondent.phone_number or '')
+
         # If admin reply is added/updated, update replied_at
         if 'admin_reply' in form.changed_data and obj.admin_reply:
             obj.replied_at = timezone.now()

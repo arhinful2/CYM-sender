@@ -18,6 +18,10 @@ class Message(models.Model):
     subject = models.CharField(max_length=200)
     content = models.TextField()
     
+    # Optional member reply link support
+    allow_member_replies = models.BooleanField(default=False)
+    reply_token = models.UUIDField(default=uuid.uuid4, editable=False)
+    
     # For group messages
     recipients = models.ManyToManyField(Member, related_name='received_messages', blank=True)
     
@@ -51,6 +55,7 @@ class MessageResponse(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='responses')
     respondent = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='message_responses')
     response_content = models.TextField()
+    respondent_phone = models.CharField(max_length=20, blank=True)
     
     # Response type
     is_acknowledgment = models.BooleanField(default=False)

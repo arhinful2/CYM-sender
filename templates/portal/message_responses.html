@@ -90,7 +90,14 @@
                             <div>
                                 <h6 class="mb-1">{{ response.respondent.full_name }}</h6>
                                 <p class="mb-1">{{ response.response_content }}</p>
-                                <small class="text-muted">Responded on {{ response.created_at|date:"F j, Y, g:i a" }}</small>
+                                <small class="text-muted">
+                                    {% if response.respondent_phone %}
+                                    {{ response.respondent_phone }} · 
+                                    {% elif response.respondent.phone_number %}
+                                    {{ response.respondent.phone_number }} · 
+                                    {% endif %}
+                                    Responded on {{ response.created_at|date:"F j, Y, g:i a" }}
+                                </small>
                             </div>
                         </div>
                         

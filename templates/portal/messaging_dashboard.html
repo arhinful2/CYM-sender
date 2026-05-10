@@ -230,7 +230,12 @@
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">{{ response.respondent.full_name }}</h6>
                                 <p class="mb-1 small">{{ response.response_content|truncatechars:50 }}</p>
-                                <small class="text-muted">
+                                <small class="text-muted d-block">
+                                    {% if response.respondent_phone %}
+                                    {{ response.respondent_phone }} · 
+                                    {% elif response.respondent.phone_number %}
+                                    {{ response.respondent.phone_number }} · 
+                                    {% endif %}
                                     Re: {{ response.message.subject|truncatechars:30 }}
                                 </small>
                             </div>

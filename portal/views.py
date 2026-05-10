@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
 from django.db.models import Q
+from django.urls import reverse
 from members.models import Member
 from messaging.models import Message, MessageResponse, Conversation, SMSLog
 from messaging.services import MessageService
@@ -552,6 +553,7 @@ def compose_message(request):
         subject = request.POST.get('subject')
         content = request.POST.get('content')
         message_type = request.POST.get('message_type', 'broadcast')
+        allow_member_replies = request.POST.get('allow_member_replies') == 'on'
         recipient_ids = request.POST.getlist('recipients')
 
         # Filter out empty strings from recipient_ids to prevent ValueError
@@ -579,6 +581,7 @@ def compose_message(request):
             subject=subject,
             content=content,
             message_type=message_type,
+            allow_member_replies=allow_member_replies,
             is_sent=True,
             sent_at=timezone.now()
         )
@@ -613,9 +616,18 @@ def compose_message(request):
             if member.phone_number:
                 # Send SMS
                 phone = str(member.phone_number)
+                outgoing_content = content
+                if allow_member_replies:
+                    reply_url = request.build_absolute_uri(reverse('member_message_reply', kwargs={
+                        'message_id': message.id,
+                        'member_id': member.id,
+                        'token': message.reply_token,
+                    }))
+                    outgoing_content = f"{content}\n\nReply here: {reply_url}\nType your response and submit."
+
                 sms_result = MessageService.send_sms(
                     phone,
-                    f"{subject}\n\n{content}"
+                    f"{subject}\n\n{outgoing_content}"
                 )
 
                 # Create SMS Log
@@ -623,7 +635,7 @@ def compose_message(request):
                     message=message,
                     member=member,
                     phone_number=phone,
-                    content=content,
+                    content=outgoing_content,
                     status='pending'
                 )
 
@@ -677,6 +689,69 @@ def compose_message(request):
     }
     
     return render(request, 'portal/compose_message.html', context)
+
+
+def member_message_reply(request, message_id, member_id, token):
+    """Public reply page for a specific member and message"""
+    message = get_object_or_404(
+        Message,
+        id=message_id,
+        reply_token=token,
+        is_deleted=False,
+        allow_member_replies=True,
+    )
+    member = get_object_or_404(Member, id=member_id)
+
+    if not message.is_broadcast and not message.recipients.filter(id=member.id).exists():
+        return HttpResponseForbidden("This reply link is not valid for this member.")
+
+    existing_response = MessageResponse.objects.filter(
+        message=message,
+        respondent=member,
+        is_deleted=False,
+    ).first()
+
+    if request.method == 'POST':
+        response_content = request.POST.get('response_content', '').strip()
+
+        if not response_content:
+            return render(request, 'portal/message_reply.html', {
+                'message': message,
+                'member': member,
+                'existing_response': existing_response,
+                'error': 'Please type a response before submitting.',
+            })
+
+        response, _created = MessageResponse.objects.update_or_create(
+            message=message,
+            respondent=member,
+            defaults={
+                'response_content': response_content,
+                'is_reply': True,
+                'respondent_phone': str(member.phone_number or ''),
+            }
+        )
+
+        conversation, _created = Conversation.objects.get_or_create(
+            message=message,
+            member=member,
+        )
+        conversation.responded = True
+        conversation.is_read = True
+        conversation.save(update_fields=['responded', 'is_read', 'last_updated'])
+
+        return render(request, 'portal/message_reply.html', {
+            'message': message,
+            'member': member,
+            'existing_response': response,
+            'success': 'Your response has been submitted successfully.',
+        })
+
+    return render(request, 'portal/message_reply.html', {
+        'message': message,
+        'member': member,
+        'existing_response': existing_response,
+    })
 
 
 @staff_member_required
