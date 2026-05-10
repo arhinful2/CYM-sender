@@ -69,7 +69,6 @@ def permission_required(permission_name):
 
 
 @staff_required
-@permission_required('can_view_members')
 @staff_member_required
 def admin_portal(request):
     """Main admin portal dashboard"""
