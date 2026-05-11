@@ -15,8 +15,17 @@ Django settings for church_youth_system project.
 """
 
 import os
+import importlib.util
 from pathlib import Path
 from decouple import config
+
+
+def _module_available(module_name):
+    return importlib.util.find_spec(module_name) is not None
+
+
+HAS_DJANGO_REDIS = _module_available('django_redis')
+HAS_CACHALOT = _module_available('cachalot')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,7 +69,6 @@ INSTALLED_APPS = [
     'import_export',
     'phonenumber_field',
     'simple_history',
-    'cachalot',
 
     # Local apps
     'members.apps.MembersConfig',
@@ -73,6 +81,9 @@ INSTALLED_APPS = [
     'giving',
     'notifications',
 ]
+
+if HAS_CACHALOT:
+    INSTALLED_APPS.append('cachalot')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -158,22 +169,33 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Caching Configuration
 REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/1')
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SOCKET_CONNECT_TIMEOUT': 5,
-            'SOCKET_TIMEOUT': 5,
-            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
-            'IGNORE_EXCEPTIONS': True,  # Fail gracefully if Redis is down
+CACHES = (
+    {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT': 5,
+                'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+                'IGNORE_EXCEPTIONS': True,  # Fail gracefully if Redis is down
+            }
         }
     }
-}
+    if HAS_DJANGO_REDIS else
+    {
+        # Safe fallback so local/dev environments still boot without django-redis.
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'church-youth-local-cache',
+            'TIMEOUT': 60 * 5,
+        }
+    }
+)
 
 # Cachalot Configuration (ORM Query Caching)
-CACHALOT_ENABLE = not DEBUG
+CACHALOT_ENABLE = (not DEBUG) and HAS_CACHALOT
 CACHALOT_TIMEOUT = 60 * 5  # 5 minutes
 
 # Internationalization
