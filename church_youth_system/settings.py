@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'import_export',
     'phonenumber_field',
     'simple_history',
+    'cachalot',
+    'compressor',
 
     # Local apps
     'members.apps.MembersConfig',
@@ -155,6 +157,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Caching Configuration
+REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/1')
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+            'IGNORE_EXCEPTIONS': True,  # Fail gracefully if Redis is down
+        }
+    }
+}
+
+# Cachalot Configuration (ORM Query Caching)
+CACHALOT_ENABLE = not DEBUG
+CACHALOT_TIMEOUT = 60 * 5  # 5 minutes
+
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -165,6 +187,21 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Django Compressor Configuration
+COMPRESS_ENABLED = not DEBUG
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinCompressor',
+]
+COMPRESS_JS_FILTERS = [
+    'compressor.filters.jsmin.JSMinFilter',
+]
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
 
 if IS_VERCEL:
     # Vercel build output may not contain a populated STATIC_ROOT directory.
