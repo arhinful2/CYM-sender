@@ -61,7 +61,6 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'simple_history',
     'cachalot',
-    'compressor',
 
     # Local apps
     'members.apps.MembersConfig',
@@ -187,21 +186,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-
-# Django Compressor Configuration
-COMPRESS_ENABLED = not DEBUG
-COMPRESS_CSS_FILTERS = [
-    'compressor.filters.css_default.CssAbsoluteFilter',
-    'compressor.filters.cssmin.CSSMinCompressor',
-]
-COMPRESS_JS_FILTERS = [
-    'compressor.filters.jsmin.JSMinFilter',
-]
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
-]
 
 if IS_VERCEL:
     # Vercel build output may not contain a populated STATIC_ROOT directory.
