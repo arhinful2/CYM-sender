@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 """
 Django settings for church_youth_system project.
+REBUILD TRIGGER: Force Vercel to run migration 0008_message_allow_member_replies_message_reply_token_and_more
 """
 
 import os
