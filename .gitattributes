@@ -1,0 +1,7 @@
+﻿# Force UTF-8 encoding and LF line endings
+* text=auto
+*.py text eol=lf encoding=UTF-8
+*.txt text eol=lf encoding=UTF-8
+*.md text eol=lf encoding=UTF-8
+*.json text eol=lf encoding=UTF-8
+requirements.txt text eol=lf encoding=UTF-8
