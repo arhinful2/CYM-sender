@@ -383,3 +383,53 @@ class MessageService:
                 'error': result.get('error')
             })
         return results
+
+from django.utils import timezone
+from members.models import Member
+
+def render_message_content(content, member, context=None):
+    """
+    Replace placeholders in message content with actual data.
+    Supports:
+        [first_name], [last_name], [full_name]
+        [phone], [email]
+        [church_name], [church_location]
+        [service_date], [service_time] (if provided in context)
+        [date] (today's date)
+    """
+    if not content:
+        return content
+
+    # Church settings (you can replace these with your SiteSetting model later)
+    church_name = "First Baptist Church"
+    church_location = "Main Auditorium"
+
+    # Get member data safely
+    first_name = getattr(member, 'first_name', '')
+    last_name = getattr(member, 'last_name', '')
+    full_name = f"{first_name} {last_name}".strip() or 'Member'
+    phone = str(member.phone_number) if member.phone_number else ''
+    email = member.email or ''
+
+    # Context overrides (e.g., for event details)
+    service_date = context.get('service_date', '') if context else ''
+    service_time = context.get('service_time', '') if context else ''
+
+    # Mapping of placeholder -> value
+    replacements = {
+        '[first_name]': first_name,
+        '[last_name]': last_name,
+        '[full_name]': full_name,
+        '[phone]': phone,
+        '[email]': email,
+        '[church_name]': church_name,
+        '[church_location]': church_location,
+        '[service_date]': service_date or '[service_date]',
+        '[service_time]': service_time or '[service_time]',
+        '[date]': timezone.now().strftime('%B %d, %Y'),
+    }
+
+    for placeholder, value in replacements.items():
+        content = content.replace(placeholder, str(value))
+
+    return content
