@@ -633,19 +633,15 @@ def compose_message(request):
         # Send SMS to recipients
         sms_sent_count = 0
         sms_failed_count = 0
-
+        
         for member in recipients:
             if member.phone_number:
                 phone = str(member.phone_number)
-                context_data = {} 
-                rendered_content = render_message_content(content, member, context_data)
-                 # ===== BUILD CONTEXT WITH DATE/TIME =====
                 context_data = {
-                    'service_date': service_date,
-                    'service_time': service_time,
+                    'service_date': service_date_formatted,
+                    'service_time': service_time_formatted,
                     }
                 rendered_content = render_message_content(content, member, context_data)
-                # ===== END CONTEXT =====
                 
                 if allow_member_replies:
                     reply_url = request.build_absolute_uri(reverse('member_message_reply', kwargs={
@@ -656,32 +652,29 @@ def compose_message(request):
                     outgoing_content = f"{rendered_content}\n\nReply here: {reply_url}\nType your response and submit."
                 else:
                     outgoing_content = rendered_content
+                    
                     sms_result = MessageService.send_sms(
                         phone,
                         f"{subject}\n\n{outgoing_content}"
                         )
-
-                # Create SMS Log
+                    
                 sms_log = SMSLog.objects.create(
                     message=message,
                     member=member,
                     phone_number=phone,
                     content=outgoing_content,
                     status='pending'
-                )
-
+                    )
                 if sms_result.get('success'):
                     sms_log.status = 'sent'
-                    sms_log.provider_message_id = sms_result.get(
-                        'message_id', '')
+                    sms_log.provider_message_id = sms_result.get('message_id', '')
                     sms_log.sent_at = timezone.now()
                     sms_sent_count += 1
                 else:
                     sms_log.status = 'failed'
-                    sms_log.error_message = sms_result.get(
-                        'error', 'Unknown error')
+                    sms_log.error_message = sms_result.get('error', 'Unknown error')
                     sms_failed_count += 1
-
+                
                 sms_log.save()
 
         # Update message SMS status
