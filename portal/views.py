@@ -658,25 +658,24 @@ def compose_message(request):
                         f"{subject}\n\n{outgoing_content}"
                         )
                     
-                    sms_log = SMSLog.objects.create(
-                        message=message,
-                        member=member,
-                        phone_number=phone,
-                        content=outgoing_content,
-                        status='pending'
-                        )
-                    if sms_result.get('success'):
-                        sms_log.status = 'sent'
-                        sms_log.provider_message_id = sms_result.get('message_id', '')
-                        sms_log.sent_at = timezone.now()
-                        sms_sent_count += 1
-                    else:
-                        sms_log.status = 'failed'
-                        sms_log.error_message = sms_result.get('error', 'Unknown error')
-                        sms_failed_count += 1
-                        
-                        sms_log.save()
-
+                sms_log = SMSLog.objects.create(
+                    message=message,
+                    member=member,
+                    phone_number=phone,
+                    content=outgoing_content,
+                    status='pending'
+                    )
+                if sms_result.get('success'):
+                    sms_log.status = 'sent'
+                    sms_log.provider_message_id = sms_result.get('message_id', '')
+                    sms_log.sent_at = timezone.now()
+                    sms_sent_count += 1
+                else:
+                    sms_log.status = 'failed'
+                    sms_log.error_message = sms_result.get('error', 'Unknown error')
+                    sms_failed_count += 1
+                
+                sms_log.save()
 
         # Update message SMS status
         if sms_sent_count > 0:
