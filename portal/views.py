@@ -28,6 +28,7 @@ from django.shortcuts import redirect  # If not already imported
 from django.db.models import Case, When, Value, IntegerField
 from django.db.models.functions import ExtractMonth
 from django.utils import timezone as django_timezone
+from messaging.services import render_message_content
 
 
 def home(request):
@@ -547,13 +548,35 @@ def bulk_delete_responses(request):
 def compose_message(request):
     """Compose and send messages"""
     from messaging.models import MessageTemplate
-
     if request.method == 'POST':
         subject = request.POST.get('subject')
         content = request.POST.get('content')
         message_type = request.POST.get('message_type', 'broadcast')
         allow_member_replies = request.POST.get('allow_member_replies') == 'on'
         recipient_ids = request.POST.getlist('recipients')
+
+        service_date = request.POST.get('service_date', '')
+        service_time = request.POST.get('service_time', '')
+        
+        if service_date:
+            try:
+                from datetime import datetime
+                dt = datetime.strptime(service_date, '%Y-%m-%d')
+                service_date_formatted = dt.strftime('%A, %B %d, %Y')
+            except:
+                service_date_formatted = service_date
+            else:
+                service_date_formatted = ''
+        if service_time:
+                try:
+                    from datetime import datetime
+                    dt = datetime.strptime(service_time, '%H:%M')
+                    service_time_formatted = dt.strftime('%I:%M %p')
+                except:
+                    service_time_formatted = service_time
+                else:
+                    service_time_formatted = ''
+
 
         # Filter out empty strings from recipient_ids to prevent ValueError
         recipient_ids = [rid for rid in recipient_ids if rid and rid.strip()]
@@ -613,21 +636,30 @@ def compose_message(request):
 
         for member in recipients:
             if member.phone_number:
-                # Send SMS
                 phone = str(member.phone_number)
-                outgoing_content = content
+                context_data = {} 
+                rendered_content = render_message_content(content, member, context_data)
+                 # ===== BUILD CONTEXT WITH DATE/TIME =====
+                context_data = {
+                    'service_date': service_date,
+                    'service_time': service_time,
+                    }
+                rendered_content = render_message_content(content, member, context_data)
+                # ===== END CONTEXT =====
+                
                 if allow_member_replies:
                     reply_url = request.build_absolute_uri(reverse('member_message_reply', kwargs={
                         'message_id': message.id,
                         'member_id': member.id,
                         'token': message.reply_token,
-                    }))
-                    outgoing_content = f"{content}\n\nReply here: {reply_url}\nType your response and submit."
-
-                sms_result = MessageService.send_sms(
-                    phone,
-                    f"{subject}\n\n{outgoing_content}"
-                )
+                        }))
+                    outgoing_content = f"{rendered_content}\n\nReply here: {reply_url}\nType your response and submit."
+                else:
+                    outgoing_content = rendered_content
+                    sms_result = MessageService.send_sms(
+                        phone,
+                        f"{subject}\n\n{outgoing_content}"
+                        )
 
                 # Create SMS Log
                 sms_log = SMSLog.objects.create(
@@ -794,10 +826,11 @@ def quick_announcement(request):
             for member in recipients:
                 if member.phone_number:
                     phone = str(member.phone_number)
+                    rendered_content = render_message_content(content, member, {})
                     sms_result = MessageService.send_sms(
                         phone,
-                        f"{title}\n\n{content}"
-                    )
+                        f"{title}\n\n{rendered_content}"
+                        )
 
                     # Create SMS Log
                     sms_log = SMSLog.objects.create(
