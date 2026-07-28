@@ -15,7 +15,7 @@ Django settings for church_youth_system project.
 REBUILD TRIGGER: Force Vercel to run migration 0008_message_allow_member_replies_message_reply_token_and_more
 """
 
-import os
+import os   
 import importlib.util
 from pathlib import Path
 from decouple import config
